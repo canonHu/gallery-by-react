@@ -1,0 +1,173 @@
+<style lang="less">
+  .input-view {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 60.5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .placeholder-style {
+    color: #999999;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .word-count-style {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 11px;
+  }
+
+  .word-count-text-style {
+    font-size: 14px;
+    color: #999999
+  }
+
+  .view-line {
+    border-bottom: 0.5px solid rgba(0,0,0,0.10);
+    margin-top: 4px;
+  }
+
+  .complete-button {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FF7733;
+  }
+
+  .complete-button-text {
+    font-size: 18px;
+    color: #FFFFFF;
+  }
+
+  .tip-view {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 28px;
+  }
+
+  .tip-title-style {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .tip-line-view {
+    width: 6px;
+    height: 6px;
+    border-radius: 100px;
+    background-color: #FFC739
+  }
+
+  .tip-title-text {
+    font-size: 18px;
+    color: #333333;
+    margin-left: 8px;
+    font-weight: bold
+  }
+
+  .tip-detail {
+    font-size: 14px;
+    color: #666666;
+  }
+</style>
+
+<template>
+  <view>
+    <view class="input-view">
+
+      <textarea
+        style="font-size: 24px; color: #333333; font-weight: bold; height: 33px; width: 100%;"
+        placeholder="请输入旅行心得标题"
+        placeholder-class="placeholder-style"
+        value="{{title}}"
+        maxlength="50"
+        auto-height="true"
+        bindinput="bindinput"
+        bindblur="bindblur"
+      />
+
+      <view class="word-count-style">
+        <text class="word-count-text-style">可输入<text style="color: #65ABFC; font-weight: bold;">{{maxWordCount}}</text>字</text>
+      </view>
+      <view class="view-line"/>
+    </view>
+
+    <view class="tip-view">
+      <view class="tip-title-style">
+        <view class="tip-line-view"/>
+        <text class="tip-title-text">提示</text>
+      </view>
+      <view style="margin-top: 4px;">
+        <text class="tip-detail">1. 一个好的标题会给你带来更多的阅读哦</text>
+      </view>
+      <view style="margin-top: 2px;">
+        <text class="tip-detail">2. 标题也可以在写心得的过程中进行编辑</text>
+      </view>
+    </view>
+
+    <view @tap="clickedCompleteButton" class="complete-button">
+      <text class="complete-button-text">{{completeText}}</text>
+    </view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import utils from '../../../utils/utils'
+  import { connect } from 'wepy-redux'
+  import { CHANGE_CONTENT_TITLE } from '../../../store/types/editor'
+
+  @connect({
+
+  }, {
+    clickedCompleteButton: CHANGE_CONTENT_TITLE
+  })
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '发布旅行心得'
+    }
+
+    data = {
+      type: '',
+      spacePois: [],
+      title: '',
+      maxWordCount: 50,
+      isEditor: false,
+      completeText: '下一步'
+    }
+
+    computed = {}
+
+    methods = {
+      bindinput(value, cursor) {
+        this.maxWordCount = 50 - value.detail.value.length
+      },
+      bindblur(value) {
+        this.title = value.detail.value
+      }
+    }
+
+    onLoad(options) {
+      this.spacePois = options.spacePois
+      this.type = options.type
+      this.isEditor = (options.isEditor === 'true')
+      this.completeText = this.isEditor ? '完成' : '下一步'
+      this.title = ''
+      if (this.isEditor) {
+        this.title = options.title
+        this.maxWordCount = 50 - options.title.length
+      }
+    }
+  }
+</script>

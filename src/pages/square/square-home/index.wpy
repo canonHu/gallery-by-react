@@ -1,0 +1,494 @@
+<style lang="less">
+  page {
+    background-color: #EDF0F5;
+  }
+
+  .top-button {
+    position: fixed;
+    bottom: 89px;
+    right: 7px;
+  }
+
+  .post-button {
+    position: fixed;
+    bottom: 33px;
+    right: 3px;
+  }
+
+  .search-view {
+    margin-right: 15px;
+    margin-left: 15px;
+    background-color: #EDF0F5;
+    border-radius: 18px;
+    height: 36px;
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-view .cityName {
+    font-size: 14px;
+    text-align: center;
+    color: #333333;
+    margin-left: 22px;
+  }
+
+  .search-view .arrow {
+    width: 10px;
+    height: 5.8px;
+    margin-left: 5px;
+  }
+
+  .search-view .place-view {
+    width: 2px;
+    height: 18px;
+    background-color: #CCCCCC;
+    margin-left: 8.3px;
+  }
+
+  .search-view .search-img {
+    width: 14px;
+    height: 14px;
+    margin-left: 13.7px;
+  }
+
+  .search-view .place-text {
+    font-size: 14px;
+    color: #979797;
+    margin-left: 5px;
+    display: flex;
+    flex: 1
+  }
+
+  .tab-list {
+    background-color: white;
+    padding-left: 11px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 0.5px solid rgba(0,0,0,0.10);
+  }
+
+  .tab-select {
+    width: 40px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .alert-mask {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: rgba(0,0,0,0.50);
+    width: 100%;
+    height: 100%;
+  }
+
+  alert-back {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+  }
+
+  .sort-view {
+    display: flex;
+    flex-direction: row;
+    height: 42px;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .sort-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .count-text {
+    font-size: 14px;
+    color: #777777;
+  }
+
+  .space-detail-empty-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 108px;
+    background-color: white;
+    padding-bottom: 186px;
+  }
+
+  .space-detail-empty-text {
+    font-size: 15px;
+    color: #666666;
+    margin-top: 6px;
+  }
+</style>
+
+<template>
+  <view>
+    <view style="padding-top: 20px; background-color: #FFFFFF">
+      <view class="search-view">
+        <text class="cityName" @tap="jumpPoiSelect">{{cityName}}</text>
+        <image src="../../../images/tn-wx-square-arrow-down.png"
+               class="arrow" @tap="jumpPoiSelect"/>
+        <view class="place-view"></view>
+        <image src="../../../images/tn-wx-search-search.png"
+               class="search-img"/>
+        <text class="place-text" @tap="jumpContentSelect">目的地/关键词</text>
+      </view>
+    </view>
+    <view class="tab-list">
+      <view style="width: {{getTabViewWidth}}px;">
+        <tablist
+          :tabs.sync="tabs"
+          :selectIndex.sync="selectIndex"
+          :defaultTitleColor="defaultTitleColor"
+          :defaultTitleBold="defaultTitleBold"
+          :selectTitleColor="selectTitleColor"
+          :selectTitleBold="selectTitleBold"
+          :indicatorColor="indicatorColor"
+          @tapEvent.user="clickCurrentTab"
+        />
+      </view>
+
+      <image
+        src="../../../images/tn-wx-space-detail-shadow.png"
+        style="width: 14px; height: 42px;"
+      />
+      <view @tap="clickedShowTabListView" class="tab-select">
+        <image
+          src="../../../images/tn-wx-space-tab-more.png"
+          style="width: 14px; height: 8px;"
+        />
+      </view>
+    </view>
+    <view style="position: relative;">
+      <view wx:if="{{list.length > 0}}" class="sort-view">
+        <view>
+          <text class="count-text">共<text>{{list.length}}</text>条信息</text>
+        </view>
+        <view @tap="clickedSortButton" class="sort-button">
+          <text style="font-size: 14px; color: #999999;">{{sortTypes[currentSort]}}</text>
+          <image
+            src="../../../images/tn-wx-space-detail-sort.png"
+            style="margin-left: 5px;width: 15px; height: 13px;"
+          />
+        </view>
+      </view>
+      <scroll-view wx:if="{{list.length > 0}}">
+        <repeat for="{{list}}" key="index" index="index">
+          <releaseitem :cancelFlag="cancelFlag"
+                       :items="item"
+                       :index="index"
+                       :fromSquare="fromSquare"
+                       @tapEvent.user="clickedListItem"
+                       @tapMoreEvent.user="clickedListItemMoreButton"
+          />
+        </repeat>
+      </scroll-view>
+
+      <!--无内容-->
+      <view wx:else class="space-detail-empty-view">
+        <image
+          src="../../../images/tn-wx-square-empty.png"
+          style="width: 82px; height: 132px;"
+        />
+        <text class="space-detail-empty-text">暂无内容，快来发布新内容</text>
+      </view>
+
+      <!--蒙层框-->
+      <view
+        wx:if="{{showAlert}}"
+        @tap="clickedMaskBack"
+        class="alert-mask"
+      >
+        <view class="alert-back">
+          <alertlist
+            :items.sync="currentAlertSource"
+            :syncOffsetY.sync="showAlertOffset"
+            :showSelectStyle.sync="currentAlertSelectStyle"
+            :currentSelect.sync="currentSort"
+            :totalCount.sync="currentAlertSourceCount"
+            @clickedAlertItem.user="clickedAlertItem"
+          />
+        </view>
+      </view>
+
+      <!--tab栏-->
+      <view
+        wx:if="{{showTabview}}"
+        @tap="clickedShowTabListView"
+        class="alert-mask"
+      >
+        <tablistview
+          :tabs.sync="tabs"
+          :selectIndex.sync="selectIndex"
+          :defaultBackColor="defaultBackColor_view"
+          :defaultTitleColor="defaultTitleColor_view"
+          :defaultTitleBold="defaultTitleBold_view"
+          :defaultBorderColor="defaultBorderColor_view"
+          :selectTitleColor="selectTitleColor_view"
+          :selectTitleBold="selectTitleBold_view"
+          :selectBorderColor="selectBorderColor_view"
+          :selectBackColor="selectBackColor_view"
+          @tapEvent.user="clickCurrentTab"
+        />
+      </view>
+    </view>
+    <image wx:if="{{showToTop}}"
+           @tap="clickedTopButton"
+           class="top-button"
+           style="width: 55px; height: 55px;"
+           src="../../../images/tn-wx-square-back-icon.png"
+    />
+    <image @tap="clickedPostButton"
+           class="post-button"
+           style="width: 63px; height: 63px;"
+           src="../../../images/tn-wx-square-post-icon.png"
+    />
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import TabListView from '../../../components/tab-list-view'
+  import TabList from '../../../components/tab-list'
+  import test from '../../../utils/test'
+  import AlertList from '../../../components/alert-list'
+  import ReleaseItem from '../../../components/release-item'
+  import { responseRelease } from '../../../mixins/testJson'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '广场',
+      enablePullDownRefresh: true
+    }
+
+    components = {
+      releaseitem: ReleaseItem,
+      tablist: TabList,
+      tablistview: TabListView,
+      alertlist: AlertList
+    }
+
+    computed = {
+      getTabViewWidth() {
+        return this.$parent.globalData.screenWidth - 54
+      }
+    }
+
+    data = {
+      list: [],
+      cityName: '全部城市',
+      cityCode: 0,
+
+      isAuthor: false,
+      isAdmin: false,
+
+      showToTop: false,
+      screenHeight: 0,
+
+      fromSquare: true,
+
+      tabs: [],
+      defaultTitleColor: '#666666',
+      defaultTitleBold: 'normal',
+      selectTitleColor: '#333333',
+      selectTitleBold: 'bold',
+      indicatorColor: '#ff7733',
+      selectIndex: 0,
+      selectItem: {},
+
+      cancelFlag: false,
+
+      showTabview: false,
+      defaultBackColor_view: '#FFFFFF',
+      defaultTitleColor_view: '#333333',
+      defaultTitleBold_view: 'normal',
+      defaultBorderColor_view: 'transparent',
+      selectBackColor_view: '#FFFCF8',
+      selectTitleColor_view: '#FF5500',
+      selectTitleBold_view: 'bold',
+      selectBorderColor_view: '#FF7733',
+
+      showAlert: false,
+      showAlertOffset: 0,
+      currentAlertType: '',
+      currentAlertSource: [],
+      currentAlertSourceCount: 0,
+      currentAlertSelectStyle: false,
+      currentSort: 0,
+      sortTypes: [
+        '默认排序',
+        '发布时间排序',
+        '热度排序'
+      ],
+      itemTypes: [
+        '分享',
+        '移动'
+      ]
+    }
+
+    methods = {
+      clickedTopButton() {
+        wx.pageScrollTo({
+          scrollTop: 0,
+          duration: 300
+        })
+      },
+      clickedPostButton() {
+        this.$navigate('../../pop/content-post/index', {type: 'square'})
+      },
+      clickCurrentTab(num, evt) {
+        this.selectIndex = num.index
+        this.selectItem = num.info
+        this.changeTab(num.info.title)
+      },
+      clickedShowTabListView() {
+        this.showTabview = !this.showTabview
+      },
+      jumpPoiSelect() {
+        this.$navigate('../../space/add-destination/index?fromSquare=' + this.fromSquare, {})
+      },
+      jumpContentSelect() {
+        this.$navigate('../../search/content-search/index?fromSquare=' + this.fromSquare, {})
+      },
+      clickedSortButton(num, evt) {
+        this.currentAlertType = 'sort'
+        this.currentAlertSource = this.sortTypes
+        this.currentAlertSelectStyle = true
+        this.currentAlertSourceCount = this.sortTypes.length
+        this.showAlert = true
+        this.showAlertOffset = num.currentTarget.offsetTop + 24
+      },
+      clickedAlertItem(num, evt) {
+        let index = num.index
+        if (this.currentAlertType === 'sort') {
+          this.currentSort = index
+        }
+      },
+      clickedListItem(info) {
+        // 心得详情
+        if (!info || !info.item) {
+          return
+        }
+        this.$navigate('../../article/article-detail/index?id=' + info.item.originId, {})
+      },
+      clickedMaskBack() {
+        this.showAlert = false
+        this.currentAlertType = ''
+        this.currentAlertSource = []
+        this.currentAlertSelectStyle = false
+        this.currentAlertSourceCount = 0
+      },
+      clickedListItemMoreButton(num) {
+        this.currentAlertType = 'itemMore'
+        this.currentAlertSource = this.itemTypes
+        this.currentAlertSelectStyle = false
+        this.currentAlertSourceCount = this.itemTypes.length
+        this.showAlert = true
+        this.showAlertOffset = num.offsetTop
+
+        this.currentSelectIndex = num.index
+      }
+    }
+
+    datachange() {
+      this.list.forEach((detail, j) => {
+        detail.elements.forEach((item, i) => {
+          if (item.elementId === 0) {
+            detail.elementContent = item.content
+          } else if (item.elementId === 1) {
+            item.imgs.forEach((value, index) => {
+              detail.imageNumber++
+              if (detail.imagesList.length < 3) {
+                detail.imagesList.push(value.imgUrl)
+              } else {
+                detail.imagesNumberFlag = true
+              }
+            })
+          }
+        })
+      })
+    }
+
+    onLoad() {
+      if (responseRelease.success) {
+        this.list = responseRelease.data.list
+        this.list.forEach((item, i) => {
+          item.flag = true
+          item.imageNumber = 0
+          item.imagesList = []
+          item.elementContent = ''
+          item.imagesNumberFlag = false
+        })
+
+        this.datachange()
+      }
+      this.screenHeight = wx.getSystemInfoSync().windowHeight
+      this.tabs = test.testTabData
+      this.$apply()
+    }
+
+    onPullDownRefresh() {
+      wx.showNavigationBarLoading()
+      setTimeout(function() {
+        wx.hideNavigationBarLoading()
+        wx.stopPullDownRefresh()
+      }, 1500)
+    }
+
+    onPageScroll(obj) {
+      if (obj.scrollTop > this.screenHeight * 1.5) {
+        if (!this.showToTop) {
+          this.showToTop = true
+          this.$apply()
+        }
+      } else {
+        if (this.showToTop) {
+          this.showToTop = false
+          this.$apply()
+        }
+      }
+    }
+
+    changeTab(tabName) {
+    }
+
+    onShareAppMessage(options) {
+      let self = this
+      let shareObj = {
+        title: '旅行最in攻略、最hot推荐、最实用指南',
+        path: '/pages/space/space-list/index',
+        success: function (res) {
+          if (res.errMsg === 'shareAppMessage:ok') {
+          }
+        },
+        fail: function (res) {
+          // 转发失败之后的回调
+          if (res.errMsg === 'shareAppMessage:fail cancel') {
+            // 用户取消转发
+          } else if (res.errMsg === 'shareAppMessage:fail') {
+            // 转发失败，其中 detail message 为详细失败信息
+          }
+        },
+        complete: function () {
+
+        }
+      }
+      if(options.from === 'button') {
+      }
+      return shareObj
+    }
+  }
+</script>

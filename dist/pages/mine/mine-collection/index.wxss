@@ -1,0 +1,25 @@
+@import "./../../../components/release-item.wxss";
+page {
+  background-color: #f6f6f6;
+}
+.collection-edit {
+  display: flex;
+  color: #333333;
+  font-size: 16px;
+  margin-top: 11px;
+  line-height: 16px;
+  margin-bottom: 7px;
+  padding-right: 15px;
+  flex-direction: row-reverse;
+}
+.collection .cancel {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50px;
+  position: fixed;
+  font-size: 18px;
+  line-height: 50px;
+  text-align: center;
+  background-color: #ff7733;
+}

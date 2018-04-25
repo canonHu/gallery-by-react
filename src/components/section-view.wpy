@@ -1,0 +1,102 @@
+<style type="less">
+  .local-title-view {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    padding-bottom: 3px;
+    padding-left: 14px;
+    padding-right: 16px;
+  }
+
+  .title-text {
+    font-size: 13px;
+    color: #A5A5A5;
+  }
+
+  .local-title-clear {
+    font-size: 13px;
+    color: #FF7733;
+  }
+
+  .local-content-view {
+    display: flex;
+    flex-direction: row;
+    padding-left: 5px;
+    padding-bottom: 17px;
+  }
+
+  .local-item {
+    background-color: #F2F4F7;
+    border-radius: 100px;
+    display: flex;
+    flex-direction: row;
+    padding-top: 6.5px;
+    padding-bottom: 5.5px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 9px;
+    margin-top: 9px;
+  }
+
+  .local-item-text {
+    font-size: 14px;
+    color: #333333;
+  }
+</style>
+
+<template>
+  <view>
+    <view class="local-title-view">
+      <text class="title-text">{{title}}</text>
+      <view wx:if="{{showClear}}" @tap="clickedClearLocalButton">
+        <text class="local-title-clear">清除</text>
+      </view>
+    </view>
+    <view class="local-content-view">
+      <repeat for="{{dataList}}" key="index" index="index">
+        <view
+          class="local-item"
+          data-index="{{index}}"
+          @tap="clickedCurrentPoi">
+          <text class="local-item-text">{{isPoiList ? item.poiName : item.keyName}}</text>
+        </view>
+      </repeat>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class SectionView extends wepy.component {
+    props = {
+      showClear: Boolean,
+      title: String,
+      dataList: Array,
+      isPoiList: Boolean,
+      dataType: String
+    }
+
+    data = {}
+
+    methods = {
+      clickedClearLocalButton() {
+        this.dataList = []
+        this.$emit('clickedClearLocalButton', {})
+      },
+      clickedCurrentPoi(item, event) {
+        var index = item.currentTarget.dataset.index
+        this.$emit('addHistorySelect', {selected: this.dataList[index], type: this.dataType})
+      }
+    }
+
+    onLoad() {
+    }
+
+    onShow() {
+      console.log(this.dataList)
+    }
+  }
+</script>

@@ -1,0 +1,52 @@
+@import "./../../../components/mine/mine-home-head.wxss";
+page {
+  background-color: #f6f6f6;
+}
+.center {
+  display: flex;
+  justify-content: center;
+}
+.hide {
+  display: none;
+}
+.mine-home__content {
+  padding-top: 18px;
+}
+.mine-home__content .release {
+  margin-right: 15px;
+}
+.mine-home .mine-content {
+  width: 165px;
+  height: 94px;
+  border-radius: 4px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+.mine-home .mine-content__number {
+  display: flex;
+  justify-content: center;
+  color: #333333;
+  font-size: 20px;
+  margin-top: 12px;
+  line-height: 28px;
+  font-weight: bold;
+}
+.mine-home .mine-content__title {
+  display: flex;
+  justify-content: center;
+  color: #999999;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+.mine-home .mine-content__box {
+  display: flex;
+  justify-content: center;
+}
+.mine-home .mine-content__box--image {
+  width: 15px;
+  height: 15px;
+}
+.mine-home .mine-content__box--collection {
+  width: 19.1px;
+  height: 18.4px;
+}

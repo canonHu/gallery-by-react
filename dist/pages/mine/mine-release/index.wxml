@@ -1,0 +1,69 @@
+
+  <view class="release">
+    <view class="release-list">
+      <block wx:for="{{ arr }}" wx:for-index="index" wx:for-item="item" wx:key="index">
+        
+  <view class="release-items" bindtap="$releaseitem$tapEvent" data-com-index="{{index}}">
+    <view class="release-items__head">
+      <view class="release-items__head--left">
+        <view class="release-items__image">
+          <view class="release-items__image--box">
+            <image class="image" src="{{ item.userInfo.headImage }}"/>
+          </view>
+        </view>
+        <view class="release-items__dec">
+          <view class="release-items__dec--name">{{ item.userInfo.userName }}</view>
+          <view class="release-items__dec--time">{{ item.publishTime }}</view>
+        </view>
+      </view>
+      <view  wx:if="{{ !$releaseitem$cancelFlag && $releaseitem$fromSquare }}" catchtap="$releaseitem$tapMoreEvent" id="{{'more_' + index}}" class="release-items__head--right" data-com-index="{{index}}">
+        <image src="../../../images/tn-wx-space-detail-item-dots.png" style="width: 20px; height: 4px; margin-top: 10px; padding-bottom: 5px"/>
+      </view>
+      <view  wx:if="{{ $releaseitem$cancelFlag }}" class="release-items__head--right">
+        <image class="edit" wx:if="{{ item.flag }}" src="../../../images/tn-wx-editor-select-false.png"/>
+        <image class="edit" wx:else src="../../../images/tn-wx-editor-select-true.png"/>
+      </view>
+    </view>
+
+    <view class="release-items__content">
+      <view class="release-items__content--essay">
+        <view class="title">
+          <view class="title-font">{{ item.title }}</view>
+          <view>
+            <image hidden="{{ item.hasQuote }}" class="quote-image" src="../../../images/tn-wx-quote.png"/>
+          </view>
+        </view>
+        <view class="dec">{{ item.elementContent }}</view>
+      </view>
+      <view wx:if="{{ item.imageNumber !== 1 }}">
+        <view class="release-items__content--image">
+          <block wx:for="{{ item.imagesList }}" wx:for-index="$releaseitem$index" wx:for-item="$releaseitem$item" wx:key="$releaseitem$index">
+            <view class="scene" style="background-image: url({{ $releaseitem$item }})">
+            </view>
+          </block>
+          <view hidden="{{ !item.imagesNumberFlag }}" class="scene-number">共{{ item.imageNumber }}张</view>
+        </view>
+      </view>
+      <view wx:else>
+        <image class="scene-one" style="background-image: url({{ item.imagesList[0] }})"/>
+      </view>
+    </view>
+
+    <view class="release-items__foot">
+      <view class="release-items__foot--left">
+        <view class="label">
+          <text class="label-text">{{ item.poiList[0].name }}</text>
+        </view>
+      </view>
+      <view class="release-items__foot--right">
+        <view class="see">
+          <image class="see-icon" src="../../../images/tn-wx-mine-see.png"/>
+          <view class="see-number">{{ item.pv }}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+      </block>
+    </view>
+  </view>

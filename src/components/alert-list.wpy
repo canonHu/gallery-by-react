@@ -1,0 +1,97 @@
+<style type="less">
+  .border {
+    border-bottom: 0.5px solid rgba(0,0,0,0.10);
+  }
+
+  .alert-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 15px;
+  }
+
+  .alert-content {
+    background-color: #FFFFFF;
+    border-radius: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  .alert-arrow {
+    width: 150px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .alert-view {
+    position: absolute;
+    right: 9px;
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+  }
+</style>
+
+<template>
+  <view class="alert-view" style="top: {{syncOffsetY}}px;">
+    <view class="alert-arrow">
+      <image src="../images/tn-wx-space-detail-alert-arrow.png" style="width: 14px; height: 7px; margin-right: 6px;"/>
+    </view>
+    <view class="alert-content">
+      <repeat for="{{items}}" key="index" index="index">
+        <view
+          @tap="clickedAlertItem"
+          data-index="{{index}}"
+          class="alert-item"
+        >
+          <text style="font-size: 15px; color: {{(showSelectStyle && currentSelect === index) ? '#FF7733' : '#333333'}};">{{item}}</text>
+        </view>
+        <view wx:if="{{index !== (totalCount - 1)}}" class="border"/>
+      </repeat>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class AlertList extends wepy.component {
+    props = {
+      items: {
+        type: Object,
+        default: {}
+      },
+      syncOffsetY: {
+        type: Number,
+        default: 0
+      },
+      showSelectStyle: {
+        type: Boolean,
+        default: 0
+      },
+      currentSelect: {
+        type: Number,
+        default: 0
+      },
+      totalCount: {
+        type: Number,
+        default: 0
+      }
+    }
+
+    data = {}
+
+    computed = {}
+
+    methods = {
+      clickedAlertItem(num, evt) {
+        let index = num.currentTarget.dataset.index
+        this.$emit('clickedAlertItem', {item: this.items[index], index:index})
+      }
+    }
+
+    onLoad() {
+
+    }
+  }
+</script>

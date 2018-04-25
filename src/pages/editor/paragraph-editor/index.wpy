@@ -1,0 +1,227 @@
+<style lang="less">
+  .input-view {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 35.5px;
+    padding-bottom: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .placeholder-style {
+    color: #999999;
+    font-size: 24px;
+  }
+
+  .word-count-style {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 11px;
+  }
+
+  .word-count-text-style {
+    font-size: 14px;
+    color: #999999
+  }
+
+  .content-placeholder-style {
+    color: #CCCCCC;
+    font-size: 15px;
+    height: 33px;
+    margin-top: 9px;
+  }
+
+  .content-view {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 16px;
+    border-top: 0.5px solid rgba(0,0,0,0.10);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .add-content-button {
+    margin-top: 31px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .images-view {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 9px;
+  }
+
+  .image-view {
+    width: 80px;
+    height: 80px;
+    position: relative;
+  }
+
+  .input {
+    height: 300px;
+    font-size: 14px;
+    color: #666666;
+    width: 100%;
+  }
+
+  .back-view {
+    width: 100%;
+    position: fixed;
+    bottom: 0px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .complete-button {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FF7733;
+  }
+
+  .complete-button-text {
+    font-size: 18px;
+    color: #FFFFFF;
+  }
+</style>
+
+<template>
+  <view style="background-color: white;">
+    <view class="input-view">
+
+      <textarea
+        id="title"
+        style="font-size: 24px; color: #333333; font-weight: bold; height: 33px; width: 100%;"
+        placeholder="添加段落标题（非必填）"
+        placeholder-class="placeholder-style"
+        value="{{title}}"
+        maxlength="30"
+        auto-height="true"
+        bindinput="bindinput"
+        bindblur="bindblur"
+      />
+
+      <view class="word-count-style">
+        <text class="word-count-text-style">可输入<text style="color: #65ABFC; font-weight: bold;">{{maxTitleWordCount}}</text>字</text>
+      </view>
+    </view>
+
+    <view class="content-view">
+
+      <textarea
+        id="content"
+        class="input"
+        placeholder="段落正文 具体、真实、诚恳的问题会更快被解答 禁止发布色情、反动等与旅行无关的问题"
+        placeholder-class="content-placeholder-style"
+        value="{{content}}"
+        maxlength="800"
+        auto-height="false"
+        bindblur="bindblur"
+        bindinput="bindinput"
+      />
+
+      <view style="margin-top: 150px;display: flex; flex-direction: row; justify-content: flex-end;">
+        <text class="word-count-text-style">可输入<text style="color: #65ABFC; font-weight: bold;">{{maxContentWordCount}}</text>字</text>
+      </view>
+    </view>
+
+    <view style="height: 50px; width: 100%;"/>
+
+    <cover-view class="back-view">
+      <cover-view
+        @tap="clickedCompleteButton"
+        class="complete-button"
+      >
+        <cover-view class="complete-button-text">{{getCompleteText}}</cover-view>
+      </cover-view>
+    </cover-view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import utils from '../../../utils/utils'
+  import { connect } from 'wepy-redux'
+  import { CHANGE_PARAGRAGH_DATA } from '../../../store/types/editor'
+
+  @connect({
+
+  }, {
+    clickedCompleteButton: CHANGE_PARAGRAGH_DATA
+  })
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '发布旅行心得'
+    }
+
+    data = {
+      maxTitleWordCount: 30,
+      maxContentWordCount: 800,
+
+      elementId: 0,
+      elementType: 0,
+      title: '',
+      content: '',
+      isEditor: false,
+    }
+
+    computed = {
+      getCompleteText() {
+        return '完成'
+      },
+      getSpaceSepSize() {
+        return (this.$parent.globalData.screenWidth - 30 - 80 * 4) / 3
+      }
+    }
+
+    methods = {
+      bindinput(value, cursor) {
+        if (value.currentTarget.id === 'title') {
+          this.maxTitleWordCount = 30 - value.detail.value.length
+        } else {
+          this.maxContentWordCount = 800 - value.detail.value.length
+        }
+      },
+      bindblur(value, cursor) {
+        let text = value.detail.value
+        if (value.currentTarget.id === 'title') {
+          // 段落标题
+          this.title = text
+        } else {
+          this.content = text
+        }
+      }
+    }
+
+    onLoad(options) {
+      this.isEditor = JSON.parse(options.isEditor)
+      if (this.isEditor && options.element !== undefined) {
+        let element = JSON.parse(options.element)
+        this.elementId = options.index
+        this.elementType = element.elementType
+        this.title = element.title
+        this.content = (element.content !== undefined ? element.content : '')
+
+        this.maxTitleWordCount = 30 - this.title.length
+        this.maxContentWordCount = 800 - this.content.length
+      } else {
+        this.elementId = options.index
+        this.title = ''
+        this.content = ''
+      }
+    }
+  }
+</script>

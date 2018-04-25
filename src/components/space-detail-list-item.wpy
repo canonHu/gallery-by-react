@@ -1,0 +1,264 @@
+<style type="less">
+  .space-detail-blank-style {
+    height: 9px;
+    background-color: #EDF0F5;;
+  }
+
+  .space-detail-item-view {
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    padding-top: 12px;
+  }
+
+  .space-detail-content-view {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .space-detail-content-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .space-detail-content-title-view {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 57px;
+  }
+
+  .space-detail-content-title-text {
+    font-size: 17px;
+    color: #333333;
+    font-weight: bold;
+    display: -webkit-box;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+
+  .space-detail-content-title-dots {
+    display: flex;
+    justify-content: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .space-detail-quote-tip-view {
+    position: absolute;
+    right: -42px;
+    margin-left: 5px;
+    width: 36px;
+    height: 17px;
+    border-radius: 2px;
+    border: 0.5px solid #65ABFC;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  .space-detail-quote-tip {
+    font-size: 12px;
+    color: #65ABFC;
+  }
+
+  .space-detail-content-content-text {
+    font-size: 14px;
+    color: #777777;
+    display: -webkit-box;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .space-detail-user-info-view {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .space-detail-user-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .space-detail-user-text-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 9px;
+  }
+
+  .space-detail-user-name {
+    font-size: 13px;
+    color: #666666;
+  }
+
+  .space-detail-date-time {
+    font-size: 13px;
+    color: #999999;
+  }
+
+  .space-detail-content-pv-view {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .space-detail-content-pv-count-text {
+    padding-left: 1px;
+    padding-right: 2px;
+    font-size: 13px;
+    color: #4A4C5B;
+  }
+
+  .space-detail-content-pv-text {
+    margin-top: -6px;
+    font-size: 13px;
+    color: #777777;
+  }
+
+  .space-detail-img-total {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    height: 22px;
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .space-detail-img-total-text {
+    font-size: 13px;
+    color: #ffffff;
+  }
+</style>
+
+<template>
+  <view class="space-detail-item-view" @tap="tapEvent">
+
+    <view class="space-detail-content-view">
+      <!--标题-->
+      <view class="space-detail-content-title">
+        <view class="space-detail-content-title-view">
+          <text class="space-detail-content-title-text">{{cellInfo.title}}</text>
+          <view wx:if="{{cellInfo.hasQuote}}" class="space-detail-quote-tip-view">
+            <text class="space-detail-quote-tip">引用</text>
+          </view>
+        </view>
+        <view @tap.stop="tapMoreEvent" id="{{'more_' + index}}" class="space-detail-content-title-dots">
+          <image
+            src="../images/tn-wx-space-detail-item-dots.png"
+            style="width: 20px; height: 4px;"
+          />
+        </view>
+      </view>
+
+      <!-- 内容 -->
+      <view
+        wx:if="{{getShowContentText !== ''}}"
+        style="margin-top: 8px;"
+      >
+        <text class="space-detail-content-content-text">{{cellInfo.simpleContent}}</text>
+      </view>
+
+      <!--图片-->
+      <view
+        wx:if="{{ cellInfo.simpleImgs !== undefined && cellInfo.simpleImgsCount > 0 }}"
+        style="margin-top: 8px;"
+      >
+        <view wx:if="{{cellInfo.simpleImgsCount === 1}}">
+          <image
+            src="{{cellInfo.simpleImgs[0].imgUrl}}"
+            mode="aspectFill"
+            style="width: 100%; height: 146px; background-color: rebeccapurple"
+          />
+        </view>
+        <view wx:else style="position: relative; margin-left: -9px; display: flex; flex-direction: row;">
+          <repeat for="{{cellInfo.simpleImgs}}" key="index" index="index">
+            <image
+              src="{{item.imgUrl}}"
+              mode="aspectFill"
+              style="width: 109px; height: 109px; margin-left: 9px; background-color: rebeccapurple;"
+            />
+          </repeat>
+          <view
+            wx:if="{{cellInfo.simpleImgsCount > 3}}"
+            class="space-detail-img-total"
+          >
+            <text class="space-detail-img-total-text">共{{cellInfo.simpleImgsCount}}张</text>
+          </view>
+        </view>
+      </view>
+
+      <!--用户信息-->
+      <view class="space-detail-user-info-view">
+        <view class="space-detail-user-info">
+          <image
+            src="{{cellInfo.userInfo.headImage}}"
+            style="width: 24px; height: 24px;"
+          />
+          <view class="space-detail-user-text-info">
+            <text class="space-detail-user-name">{{cellInfo.userInfo.nickName}}</text>
+            <text class="space-detail-date-time">{{cellInfo.publishTime}}</text>
+          </view>
+        </view>
+
+        <view
+          class="space-detail-content-pv-view"
+        >
+          <view style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <text class="space-detail-content-pv-count-text">{{cellInfo.pvStr}}</text>
+            <image
+              src="../images/tn-wx-space-detail-pv-line.png"
+              style="width: 100%; height: 4px; margin-top: 2px;"
+            />
+          </view>
+          <text class="space-detail-content-pv-text"> 浏览</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="space-detail-blank-style"/>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class SpaceDetailListItem extends wepy.component {
+    props = {
+      cellInfo: Object,
+      index: Number
+    }
+
+    data = {}
+
+    methods = {
+      tapEvent(num, evt) {
+        this.$emit('tapEvent', {item: this.cellInfo, index: this.index})
+      },
+      tapMoreEvent(num, evt) {
+        this.$emit('tapMoreEvent', {item: this.cellInfo, index: this.index, offsetTop: num.currentTarget.offsetTop + 9 + 48})
+      }
+    }
+
+    onLoad() {}
+  }
+</script>

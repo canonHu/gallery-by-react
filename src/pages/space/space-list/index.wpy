@@ -1,0 +1,130 @@
+<style lang="less">
+  .back-view {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .complete-button {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FF7733;
+  }
+
+  .complete-button-text {
+    font-size: 18px;
+    color: #FFFFFF;
+  }
+
+</style>
+
+<template>
+  <view>
+    <view>
+      <view class="back-view">
+        <repeat for="{{list}}" key="index" index="index">
+          <view style="margin-left: 21px;">
+            <spaceitem
+              :index="index"
+              :item="item"
+              :itemWidth="getImageWidth"
+              :spaceSize="spaceSize"
+              :addSpace="addSpace"
+              @tapEvent.user="clickedSimpleSpace"
+            />
+          </view>
+        </repeat>
+      </view>
+    </view>
+
+    <view style="height: 50px;"/>
+    <view
+      wx:if="{{addSpace}}"
+      @tap="clickedCompleteButton"
+      class="complete-button"
+    >
+      <text class="complete-button-text">确认</text>
+    </view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import SpaceItem from '../../../components/space-item'
+  import test from '../../../utils/test'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '空间列表'
+    }
+
+    components = {
+      spaceitem: SpaceItem
+    }
+
+    data = {
+      addSpace: false,
+      spaceSize: 10,
+      selectList: [],
+      list: []
+    }
+
+    computed = {
+      getImageWidth() {
+        return this.$parent.globalData.spaceItemWidth
+      },
+      getSpaceSepWidth() {
+        return Math.floor((this.$parent.globalData.screenWidth - 20 * 4 - this.$parent.globalData.spaceItemWidth * 3) / 2)
+      }
+    }
+
+    methods = {
+      clickedSimpleSpace(num, evt) {
+        if (this.addSpace === true) {
+          // 添加到空间
+          let temp = this.list[num.index]
+          if (temp.selected === true) {
+            temp.selected = false
+            for (let i = this.selectList.length - 1; i >= 0; i--) {
+              if (this.selectList[i] === temp.spaceId) {
+                this.selectList.splice(i, 1)
+              }
+            }
+          } else {
+            this.selectList.push(num.item.spaceId)
+            temp.selected = true
+          }
+          this.$apply()
+        } else {
+          this.$navigate('../space-detail/index?spaceId=' + num.item.spaceId, {})
+        }
+      },
+      clickedCompleteButton() {
+        let self = this
+        var pages = getCurrentPages()
+        var beforePage = pages[pages.length - 2] // 前一个页面
+        this.$back({
+          success: function() {
+            beforePage.addSpace(self.selectList)
+          }
+        })
+      }
+    }
+
+    onLoad(options) {
+      if (options && options.addSpace !== undefined) {
+        this.addSpace = JSON.parse(options.addSpace)
+      }
+      this.list = test.testData
+    }
+  }
+</script>

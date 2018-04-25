@@ -1,0 +1,10 @@
+.images-view {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 9px;
+}
+.image-view {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}

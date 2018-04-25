@@ -1,0 +1,303 @@
+<style lang="less">
+  .input-view {
+    height: 36px;
+    margin: 10px 15px 10px 15px;
+    border-radius: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    background-color: #EDF0F5;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .association-line {
+    border-bottom: 0.5px solid rgba(0,0,0,0.10);
+    margin-left: 15px;
+  }
+
+  .association-item {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px;
+  }
+
+  .association-item-text {
+    font-size: 16px;
+    color: #333333;
+  }
+
+  .location-title-view {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    padding-bottom: 3px;
+    padding-left: 14px;
+    padding-right: 16px;
+  }
+
+  .location-title-item {
+    background-color: #FFFBF9;
+    border-radius: 100px;
+    border: 1px solid #FF7733;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 6.5px;
+    padding-bottom: 5.5px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 9px;
+    margin-top: 9px;
+  }
+
+  .location-item-text {
+    font-size: 14px;
+    color: #FF7733;
+  }
+
+  .local-title-view {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    padding-bottom: 3px;
+    padding-left: 14px;
+    padding-right: 16px;
+  }
+
+  .title-text {
+    font-size: 13px;
+    color: #A5A5A5;
+  }
+
+  .local-title-clear {
+    font-size: 13px;
+    color: #FF7733;
+  }
+
+  .local-content-view {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding-left: 5px;
+    padding-bottom: 17px;
+  }
+
+  .local-item {
+    background-color: #F2F4F7;
+    border-radius: 100px;
+    display: flex;
+    flex-direction: row;
+    padding-top: 6.5px;
+    padding-bottom: 5.5px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 9px;
+    margin-top: 9px;
+  }
+
+  .local-item-text {
+    font-size: 14px;
+    color: #333333;
+  }
+
+  .recommend-title-view {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    padding-bottom: 3px;
+    padding-left: 15px;
+  }
+
+  .recommend-content-view {
+    flex-wrap: wrap;
+    display: flex;
+    padding-left: 6px;
+  }
+</style>
+
+<template>
+  <view>
+    <view>
+      <view class="input-view">
+        <image
+          src="../../../images/tn-wx-search-search.png"
+          style="width: 14px; height: 14px; margin-right: 5px;"
+        />
+        <input
+          style="font-size: 14px; color: #333333; flex: 1;"
+          value="{{searchKeyword}}"
+          placeholder="目的地/关键词"
+          placeholder-style="color: #CCCCCC; font-size: 14px;"
+          bindinput="bindinput"
+          bindconfirm="bindconfirm"
+        />
+        <view wx:if="{{searchKeyword !== ''}}" @tap="clickedClearSearchKeyword">
+          <image
+            src="../../../images/tn-wx-search-clear.png"
+            style="width: 15px; height: 15px;"/>
+        </view>
+      </view>
+    </view>
+
+
+    <!--联想状态下-->
+    <scroll-view wx:if="{{isSearching}}">
+      <repeat for="{{searchResults}}" key="index" index="index">
+        <listItem
+          :cellInfo="item"
+        />
+      </repeat>
+    </scroll-view>
+
+    <view wx:else>
+      <sectionView wx:if="{{historyList.length > 0}}"
+        :title.sync="getTitle"
+        :showClear.sync="showClear"
+        :dataList.sync="historyList"
+        :isPoiList.sync="isPoiList"
+        :dataType.sync="getType"
+        @addHistorySelect.user="clickHistory"
+        @clickedClearLocalButton.user="clickedClearLocalButton"
+      />
+    </view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import utils from '../../../utils/utils'
+  import test from '../../../utils/test'
+  import SectionView from '../../../components/section-view'
+  import SpaceDetailListItem from '../../../components/space-detail-list-item'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '广场搜索'
+    }
+
+    components = {
+      sectionView: SectionView,
+      listItem: SpaceDetailListItem
+    }
+
+    computed = {
+      getTitle() {
+        return '搜索历史'
+      },
+      getType() {
+        return 'history'
+      },
+      isPoiList() {
+        return false
+      }
+    }
+
+    data = {
+      fromSquare: true,
+      isSearching: false,
+      searchKeyword: '',
+      showClear: true,
+      searchResults: [],
+      historyList: [
+        {keyName: '南京'}
+      ]
+    }
+
+    methods = {
+      bindinput(value, cursor) {
+        this.searchKeyword = value.detail.value
+        if (this.searchKeyword !== '') {
+          this.isSearching = true
+        } else {
+          this.isSearching = false
+        }
+      },
+      bindconfirm(value) {
+        this.addHistorySelect(value.detail.value)
+      },
+      clickedClearSearchKeyword() {
+        this.isSearching = false
+        this.searchKeyword = ''
+      },
+      clickedClearLocalButton() {
+        this.historyList = []
+        this.clearHistory()
+      },
+      clickHistory(opts) {
+        this.addHistorySelect(opts.selected.keyName)
+      }
+    }
+
+    // 添加选择历史
+    addHistorySelect(keyName) {
+      if (!keyName) {
+        return
+      }
+      this.searchKeyword = keyName
+      this.isSearching = true
+      this.historyList.unshift({keyName: keyName})
+      this.historyList = this.historyList.slice(0, 5)
+
+      wx.setStorage({
+        key: this.fromSquare ? utils.squareSearchContentCache : utils.spaceSearchContentCache,
+        data: this.historyList,
+        success: () => {
+        }
+      })
+    }
+
+    onLoad(options) {
+      if (options) {
+        this.fromSquare = options.fromSquare
+        this.$apply()
+      }
+      if (this.fromSquare === true || this.fromSquare === 'true') {
+        this.fromSquare = true
+        wx.setNavigationBarTitle({
+          title: '广场搜索'
+        })
+      } else {
+        this.fromSquare = false
+        wx.setNavigationBarTitle({
+          title: '空间内搜索'
+        })
+      }
+      let self = this
+      this.searchResults = test.testSpaceListData
+      this.$apply()
+
+      // 获取历史搜索poi
+      wx.getStorage({
+        key: self.fromSquare ? utils.squareSearchContentCache : utils.spaceSearchContentCache,
+        success: function(res) {
+          self.historyList = res.data
+          self.$apply()
+        }
+      })
+    }
+
+    clearHistory() {
+      wx.removeStorage({
+        key: this.fromSquare ? utils.squareSearchContentCache : utils.spaceSearchContentCache,
+        data: this.historyList,
+        success: () => {
+          wx.showToast({
+            title: '清除成功',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+    }
+  }
+</script>

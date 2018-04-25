@@ -1,0 +1,195 @@
+<style lang="less">
+  page {
+    background-color: #f6f6f6;
+  }
+
+  .center {
+    display: flex;
+    justify-content: center;
+  }
+
+  .hide {
+    display: none;
+  }
+
+  .mine-home {
+
+    &__content {
+      padding-top: 18px;
+
+      .release {
+        margin-right: 15px;
+      }
+    }
+
+    .mine-content {
+      width: 165px;
+      height: 94px;
+      border-radius: 4px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 4px 0 rgba(0,0,0,0.06);
+
+      &__number {
+        .center;
+
+        color: #333333;
+        font-size: 20px;
+        margin-top: 12px;
+        line-height: 28px;
+        font-weight: bold;
+      }
+
+      &__title {
+        .center;
+
+        color: #999999;
+        font-size: 13px;
+        margin-bottom: 5px;
+      }
+
+      &__box {
+        .center;
+
+        &--image {
+          width: 15px;
+          height: 15px;
+        }
+
+        &--collection {
+          width: 19.1px;
+          height: 18.4px;
+        }
+      }
+    }
+  }
+</style>
+
+<template>
+  <view class="mine-home">
+
+    <!-- 我的首页头部 -->
+    <mineHomeHead 
+      :name.sync="name" 
+      :userInfo.sync="userInfo"
+      @toChangeName.user="changeName"
+    ></mineHomeHead>
+
+    <view class="mine-home__content">
+      <view class="center">
+
+        <!-- 我的发布 -->
+        <view class="mine-content release" @tap="mineRelease">
+          <text class="mine-content__number">{{ userInfo.publishCount }}</text>
+          <text class="mine-content__title">我的发布</text>
+          <view class="mine-content__box">
+            <image
+            class="mine-content__box--image"
+            src="../../../images/tn-wx-mine-release.png"></image>
+          </view>
+        </view>
+
+        <!-- 我的收藏 -->
+        <view class="mine-content" @tap="mineCollection">
+          <text class="mine-content__number">{{ userInfo.collectCount }}</text>
+          <text class="mine-content__title">我的收藏</text>
+          <view class="mine-content__box">
+            <image
+              class="mine-content__box--image mine-content__box--collection"
+              src="../../../images/tn-wx-mine-collection.png"
+            ></image>
+          </view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import { getStore } from 'wepy-redux'
+  import { RES_DATA } from '../../../store/types/mine'
+  import MineHomeHead from '../../../components/mine/mine-home-head'
+
+  export default class Index extends wepy.page {
+    config = {
+      avigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '我的'
+    }
+
+    components = {
+      mineHomeHead: MineHomeHead
+    }
+
+    data = {
+      userInfo: {
+        nickName: '加载中...'
+      },
+      name: '加载中...',
+      store: getStore(),
+      userId: 0
+    }
+
+    methods = {
+      mineRelease(num, evt) {
+        this.getData('release')
+        this.$navigate('../mine-release/index', {})
+      },
+
+      mineCollection(num, evt) {
+        this.getData('collection')
+        this.$navigate('../mine-collection/index', {})
+      },
+
+      changeName(num, evt) {
+        this.$navigate('../mine-change-name/index', {
+          name: this.name,
+          userId: this.userId
+        })
+      }
+    }
+
+    getData(name) {
+      let payLoads = {
+        openId: '123',
+        limit: 10,
+        page: 1
+      }
+      this.store.dispatch({
+        type: RES_DATA,
+        name,
+        payLoads
+      })
+    }
+
+    onShow() {
+      const state = this.store.getState()
+      const nickName = state.mine.nickName
+      const userInfo = state.request.userInfo
+      if (nickName) {
+        if (nickName !== this.name) {
+          this.name = nickName
+          wx.showToast({
+            title: '修改成功',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      } else {
+        if (userInfo) {
+          this.userInfo = userInfo
+          this.userId = userInfo.userId
+          this.name = userInfo.nickname
+        } else {
+          wx.showToast({
+            title: '数据获取失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      }
+    }
+  }
+</script>

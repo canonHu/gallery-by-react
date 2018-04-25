@@ -1,0 +1,312 @@
+<style lang="less">
+  .center {
+    display: flex;
+    justify-content: center;
+  }
+
+  .lineclamp {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .release-items {
+    margin-bottom: 9px;
+    padding: 10px 15px;
+    background-color: #ffffff;
+
+    &__head {
+      display: flex;
+
+      &--left {
+        display: flex;
+
+        .release-items__image {
+          &--box {
+            width: 40px;
+            height: 40px;
+            overflow: hidden;
+            border-radius: 20px;
+
+            .image {
+              width: 40px;
+              height: 40px;
+              display: block;
+            }
+          }
+        }
+
+        .release-items__dec {
+          margin-left: 11px;
+
+          &--name {
+            color: #051b28;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.39px;
+          }
+
+          &--time {
+            color: #999999;
+            font-size: 12px;
+            line-height: 17px;
+            letter-spacing: 0.33px;
+          }
+        }
+      }
+
+      &--right {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: row-reverse;
+
+        .edit {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    &__content {
+      padding-top: 14px;
+      padding-bottom: 12px;
+
+      &--essay {
+
+        .title {
+          display: flex;
+          font-size: 18px;
+          color: #333333;
+          font-weight: bold;
+          line-height: 25px;
+          margin-bottom: 4px;
+
+          &-font {
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap
+          }
+        }
+
+        .quote-image {
+          width: 36px;
+          height: 17px;
+          margin-top: 4px;
+          margin-left: 4px;
+        }
+
+        .dec {
+          .lineclamp;
+
+          color: #666666;
+          font-size: 14px;
+        }
+      }
+
+      &--image {
+        display: flex;
+        margin-top: 9px;
+        position: relative;
+
+        .scene {
+          width: 109px;
+          height: 109px;
+          margin-right: 9px;
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position:center center;
+
+          &-number {
+            right: 0;
+            bottom: 0;
+            width: 49px;
+            height: 21.8px;
+            font-size: 13px;
+            color: #ffffff;
+            text-align: center;
+            position: absolute;
+            line-height: 21.8px;
+            background-color: rgba(0, 0, 0, 0.6);
+          }
+        }
+
+        .scene:nth-of-type(3) {
+          margin-right: 0;
+        }
+      }
+
+      .scene-one {
+        width: 100%;
+        height: 146px;
+        margin-top: 9px;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position:center center;
+      }
+    }
+
+    &__foot {
+      display: flex;
+
+      &--left {
+        display: flex;
+
+        .label {
+          height: 20px;
+          display: flex;
+          padding: 0 4px;
+          font-size: 12px;
+          color: #666666;
+          line-height: 20px;
+          margin-right: 9px;
+          border-radius: 2px;
+          letter-spacing: 0.33px;
+          background-color: #edf0f5;
+        }
+      }
+
+      &--right {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: row-reverse;
+
+        .see {
+          display: flex;
+
+          &-icon {
+            width: 13px;
+            height: 10px;
+            display: block;
+            margin-top: 5px;
+          }
+
+          &-number {
+            font-size: 12px;
+            color: #666666;
+            line-height: 20px;
+            padding-left: 2px;
+            letter-spacing: 0.33px;
+          }
+        }
+      }
+    }
+  }
+</style>
+
+<template>
+  <view class="release-items" @tap="tapEvent">
+    <view class="release-items__head">
+      <view class="release-items__head--left">
+        <view class="release-items__image">
+          <view class="release-items__image--box">
+            <image class="image" src="{{ items.userInfo.headImage }}"></image>
+          </view>
+        </view>
+        <view class="release-items__dec">
+          <view class="release-items__dec--name">{{ items.userInfo.userName }}</view>
+          <view class="release-items__dec--time">{{ items.publishTime }}</view>
+        </view>
+      </view>
+      <view
+        wx:if="{{ !cancelFlag && fromSquare }}"
+        @tap.stop="tapMoreEvent" id="{{'more_' + index}}" class="release-items__head--right">
+        <image
+          src="../images/tn-wx-space-detail-item-dots.png"
+          style="width: 20px; height: 4px; margin-top: 10px; padding-bottom: 5px"
+        />
+      </view>
+      <view wx:if="{{ cancelFlag }}" class="release-items__head--right">
+        <image
+          class="edit"
+          wx:if="{{ items.flag }}"
+          src="../images/tn-wx-editor-select-false.png"
+        ></image>
+        <image
+          class="edit"
+          wx:else
+          src="../images/tn-wx-editor-select-true.png"
+        ></image>
+      </view>
+    </view>
+
+    <view class="release-items__content">
+      <view class="release-items__content--essay">
+        <view class="title">
+          <view class="title-font">{{ items.title }}</view>
+          <view>
+            <image hidden="{{ items.hasQuote }}" class="quote-image" src="../images/tn-wx-quote.png"></image>
+          </view>
+        </view>
+        <view class="dec">{{ items.elementContent }}</view>
+      </view>
+      <view wx:if="{{ items.imageNumber !== 1 }}">
+        <view class="release-items__content--image">
+          <repeat for="{{ items.imagesList }}" key="index">
+            <view
+              class="scene"
+              style="background-image: url({{ item }})"
+            >
+            </view>
+          </repeat>
+          <view hidden="{{ !items.imagesNumberFlag }}" class="scene-number">共{{ items.imageNumber }}张</view>
+        </view>
+      </view>
+      <view wx:else>
+        <image class="scene-one" style="background-image: url({{ items.imagesList[0] }})"></image>
+      </view>
+    </view>
+
+    <view class="release-items__foot">
+      <view class="release-items__foot--left">
+        <view class="label">
+          <text class="label-text">{{ items.poiList[0].name }}</text>
+        </view>
+      </view>
+      <view class="release-items__foot--right">
+        <view class="see">
+          <image class="see-icon" src="../images/tn-wx-mine-see.png"></image>
+          <view class="see-number">{{ items.pv }}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Releaseitems extends wepy.component {
+    props = {
+      items: Object,
+      cancelFlag: Boolean,
+      twoWay: true,
+      index: Number,
+      fromSquare: Boolean
+    }
+
+    methods = {
+      tapEvent() {
+        if (this.cancelFlag) {
+          this.$emit('tapEvent', {
+            flag: this.items.flag,
+            index: this.index
+          })
+        } else {
+          this.$emit('tapEvent', {
+            item: this.items,
+            index: this.index
+          })
+        }
+      },
+
+      tapMoreEvent(num, evt) {
+        this.$emit('tapMoreEvent', {
+          item: this.items,
+          index: this.index,
+          offsetTop: num.currentTarget.offsetTop + 9 + 48
+        })
+      }
+    }
+  }
+</script>

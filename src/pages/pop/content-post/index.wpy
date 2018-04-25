@@ -1,0 +1,133 @@
+<style type="less">
+  .time {
+    display:flex;
+    margin-top: 15px;
+    margin-left: 33.5px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .time .day {
+    font-size: 48px;
+    line-height: 67px;
+    color: #333333;
+  }
+
+  .time .small-text {
+    font-size: 14px;
+    line-height: 20px;
+    color: #999999;
+  }
+
+  .bottom-content {
+    position:fixed;
+    bottom:58px;
+    width:100%;
+    align-items: center;
+    justify-self: center;
+  }
+
+  .list {
+    position:relative;
+    width:100%;
+    flex-direction:row;
+    display: flex;
+    justify-content:space-around;
+  }
+
+  .item-container {
+    flex-direction: column;
+    align-items: center;
+    display: flex;
+  }
+
+  .list .image {
+    width:70px;
+    height:70px;
+  }
+
+  .list .text {
+    font-size: 14px;
+    line-height: 19px;
+    margin-top: 9px;
+    color: #333333;
+    position: relative;
+  }
+
+  .close-image {
+    width:30px;
+    height:30px;
+    margin-top: 131px;
+  }
+</style>
+
+<template>
+  <view>
+    <view class="time">
+      <text class="day">{{currentDay}}</text>
+      <view style="margin-left: 5px; display: flex; flex-direction: column">
+        <text class="small-text">{{currentWeek}}</text>
+        <text class="small-text">{{currentMon}}</text>
+      </view>
+    </view>
+    <!--广场展示两个button, 空间展示三个button-->
+    <view class="bottom-content">
+      <view class="list">
+        <repeat for="{{showIconList}}" key="index" index="index">
+          <view class="item-container" @tap="clickItem('{{item.iconUrl}}')">
+            <image src="{{item.iconImg}}" class="image"/>
+            <text class="text">{{item.iconText}}</text>
+          </view>
+        </repeat>
+      </view>
+      <view style="width: 100%; align-items: center; display: flex; justify-content: center" @tap="clickClose">
+        <image class="close-image" src="../../../images/tn-wx-pop-content-close.png"/>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import utils from '../../../utils/utils'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '发布旅行心得',
+      navigationBarTextStyle: 'black',
+      navigationBarBackground: '#ffffff'
+    }
+
+    component = {
+    }
+
+    data = {
+      type: '',
+      showIconList: [],
+      currentDay: '',
+      currentWeek: '',
+      currentMon: ''
+    }
+
+    onLoad (opts) {
+      this.type = opts.type
+      if (opts.type === 'square') {
+        this.showIconList = utils.squareIconList
+      } else {
+        this.showIconList = utils.spaceIconLit
+      }
+      var date = new Date()
+      this.currentDay = date.getDate()
+      this.currentWeek = utils.getGreateWeek(date)
+      this.currentMon = utils.getMonthYear(date)
+    }
+
+    methods = {
+      clickClose() {
+        this.$back()
+      },
+      clickItem(url) {
+        this.$redirect(url, {type: this.type})
+      }
+    }
+  }
+</script>

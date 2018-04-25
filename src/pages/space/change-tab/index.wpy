@@ -1,0 +1,146 @@
+<style lang="less">
+  page {
+    background-color: #EDF0F5;
+  }
+
+  .change-tab-border {
+    margin-left: 12px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.10);
+  }
+
+  .change-tab-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    padding-left: 15px;
+    padding-right: 16px;
+  }
+</style>
+
+<template>
+  <view style="position: absolute; top: 0px;background-color: rgba(0,0,0,0.60); width: 100%; height: 100%;">
+    <view style="margin-left: 38px; margin-right: 37px; margin-top: 30px; background-color: #FFFFFF; border-radius: 4px;">
+      <view style="padding-top: 15px; padding-bottom: 8px; text-align:center;">
+        <text style="color: #333333; font-size: 18px;">更换板块</text>
+      </view>
+
+      <view>
+        <repeat for="{{tabs}}" key="index" index="index">
+          <view class="change-tab-item">
+            <text style="font-size: 16px; color: #051B28;}};">{{item.name}}</text>
+            <image
+              @tap="clickedSelectItem"
+              data-index="{{index}}"
+              src="../../../images/tn-wx-space-item-select-{{item.isSelect === true ? 'true' : 'false'}}.png"
+              style="width: 24px; height: 24px;"
+            />
+          </view>
+          <view wx:if="{{index !== (totalCount - 1)}}" class="change-tab-border"/>
+        </repeat>
+      </view>
+
+      <view @tap="clickedCompleteButton" style="padding-top: 15px; padding-bottom: 13px; text-align:center; border-top: 0.5px solid #E5E5E5;">
+        <text style="color: #FF7733; font-size: 18px;">确定</text>
+      </view>
+    </view>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  import test from '../../../utils/test'
+  import utils from '../../../utils/utils'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '更换板块'
+    }
+
+    data = {
+      tabs: [],
+      selectTags: [],
+      totalCount: 0,
+      index: -1,
+      refreshFlag: false
+    }
+
+    computed = {
+
+    }
+
+    methods = {
+      clickedSelectItem(num) {
+        let info = utils.getSelectTagsInfo(this.tabs, this.selectTags, parseInt(num.currentTarget.dataset.index), 3)
+        this.tabs = info.tabs
+        this.selectTags = info.selectTags
+        this.$apply()
+      },
+      clickedCompleteButton() {
+        wx.setStorage({
+          key: utils.spaceChangeTag,
+          data: {index: this.index, selectTags: this.selectTags},
+          success: () => {
+            this.$back()
+          }
+        })
+      }
+    }
+
+    onLoad(options) {
+      this.index = options.index !== undefined ? options.index: -1
+      this.refreshFlag = !(options.refreshFlag === true)
+      this.selectTags = JSON.parse(options.selectTags)
+
+//      delete
+      let tabsStr = JSON.stringify(test.testTabData)
+      this.tabs = JSON.parse(tabsStr)
+//      delete
+
+      this.totalCount = this.tabs.length
+
+      if (this.selectTags !== undefined) {
+        this.tabs.forEach((item, index) => {
+          for (let i = 0; i < this.selectTags.length; i++) {
+            let tempInfo = this.selectTags[i]
+            if (item.id === tempInfo.id) {
+              item.isSelect = true
+              break
+            }
+          }
+        })
+      }
+      this.$apply()
+    }
+
+    getShowContentText(elements) {
+      let contentText = ''
+
+      if (elements !== undefined && elements.length > 0) {
+        for (let i = 0; i < elements.length; i++) {
+          let element = elements[i]
+          if (element.elementType === 0 && element.content !== '') {
+            contentText = element.content
+            break
+          }
+        }
+      }
+
+      return contentText
+    }
+
+    getShowImgs(elements) {
+
+    }
+
+    changeTab(tabName) {
+
+    }
+  }
+</script>

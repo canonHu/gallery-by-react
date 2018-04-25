@@ -1,0 +1,82 @@
+<style lang="less">
+  page {
+    height: 100%;
+  }
+
+  .back-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+
+  .button {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100px;
+    margin-top: 30px;
+    background-color: aquamarine;
+  }
+</style>
+
+<template>
+  <view class="back-view">
+
+    <view>
+      <text>需要您的授权才能使用</text>
+    </view>
+
+    <view
+      @tap="clickedSettingButton"
+      class="button">
+      <text>立即授权</text>
+    </view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import utils from '../../../utils/utils'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '无授权'
+    }
+
+    data = {
+
+    }
+
+    computed = {}
+
+    methods = {
+
+      clickedSettingButton() {
+        wx.openSetting({
+          success: (res) => {
+            if (res.authSetting['scope.userInfo'] === true) {
+              wx.showToast({
+                title: '授权成功',
+                icon: 'success',
+                duration: 2000
+              })
+              wx.switchTab({url: '../../../pages/space/space-home/index'})
+            }
+          }
+        })
+      }
+    }
+
+    onLoad(options) {
+
+    }
+  }
+</script>

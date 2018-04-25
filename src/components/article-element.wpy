@@ -1,0 +1,55 @@
+<style type="less">
+  .title {
+    font-size: 18px;
+    line-height: 22px;
+    color: #333333;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .content {
+    font-size: 15px;
+    line-height: 21px;
+    color: #4A4C5B;
+    margin-bottom: 9px;
+  }
+
+  .image {
+    width: 100%;
+    height: 146px;
+    margin-bottom: 9px;
+  }
+</style>
+
+<template>
+  <view style="display: flex; margin-left: 15px; margin-right: 15px">
+    <view wx:if="{{data.elementType === 0}}" style="display: flex; flex-direction: column">
+      <text class="title">{{data.title}}</text>
+      <text class="content">{{data.content}}</text>
+    </view>
+    <view wx:if="{{data.elementType === 1}}" style="display: flex; width: 100%; flex-direction: column">
+      <repeat for="{{data.imgs}}" key="index" index="index">
+        <image class="image" src="{{item.imgUrl}}"/>
+      </repeat>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class ArticleElement extends wepy.component {
+    props = {
+      data: Object
+    }
+
+    data = {}
+
+    computed = {}
+
+    methods = {}
+
+    onLoad() {
+    }
+  }
+</script>

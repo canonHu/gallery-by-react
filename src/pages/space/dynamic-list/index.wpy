@@ -1,0 +1,420 @@
+<style lang="less">
+  page {
+    background-color: #EDF0F5;
+  }
+
+  .tabbar-view {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-bottom: 0.5px solid rgba(0,0,0,0.10);
+    padding-top: 10px;
+    background-color: #ffffff;
+  }
+
+  .tabbar-item {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tabbar-item-back {
+    position: relative;
+  }
+
+  .tabbar-item-text {
+    font-size: 16px;
+  }
+
+  .tabbar-identity {
+    border-radius: 100px;
+    width: 100%;
+    height: 3px;
+    margin-top: 10px;
+  }
+
+  .red-dot {
+    background-color: #FF6622;
+    width: 6px;
+    height: 6px;
+    border-radius: 100px;
+    position: absolute;
+    top: 5px;
+    right: -9px;
+  }
+
+  .dynamic-empty-text {
+    position: absolute;
+    top: 180px;
+    justify-content: center;
+    align-items: center;
+    color: #666666;
+    font-size: 16px
+  }
+
+  .dynamic-empty-view {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    background-color: white;
+    padding-top: 44px;
+  }
+</style>
+
+<template>
+  <view>
+
+    <scroll-view style="background-color: {{getBackgroundColor}}; margin-top: 50px;">
+      <!--空白view-->
+      <view
+        wx:if="{{checkIsEmptyStatus}}"
+        class="dynamic-empty-view"
+        style="height: {{getScreenHeight}}px;"
+      >
+        <image src="../../../images/tn-wx-dynamic-empty.png" style="width: 251px; height: 162px;"/>
+        <text class="dynamic-empty-text">暂无空间动态</text>
+      </view>
+
+      <view wx:if="{{checkExperienceStatus}}" style="display: inline-block; width: 100%;">
+        <scroll-view>
+          <repeat for="{{experienceList}}" key="index" index="index">
+            <experienceitem
+              :item="item"
+            />
+          </repeat>
+        </scroll-view>
+      </view>
+
+      <view wx:if="{{checkReplyStatus}}" style="display: inline-block; width: 100%;">
+        <scroll-view>
+          <repeat for="{{replyList}}" key="index" index="index">
+            <replyitem
+              :item="item"
+              @replyEvent.user="clickedReplyButton"
+            />
+          </repeat>
+        </scroll-view>
+      </view>
+
+      <view wx:if="{{checkPraiseStatus}}" style="display: inline-block; width: 100%;">
+        <scroll-view>
+          <repeat for="{{praiseList}}" key="index" index="index">
+            <experienceitem :item="item"/>
+          </repeat>
+        </scroll-view>
+      </view>
+
+    </scroll-view>
+
+    <!-- tab栏 -->
+    <view class="tabbar-view">
+      <repeat for="{{tabs}}" key="index" index="index">
+        <view class="tabbar-item" id="{{item.type}}" @tap="clickedCurrentTab">
+          <view class="tabbar-item-back">
+            <text class="tabbar-item-text" style="color: {{item.titleColor}}; font-weight: {{item.titleBold}}">{{item.title}}</text>
+            <view class="tabbar-identity" style="background-color: {{item.indicatorColor}}"/>
+            <view class="red-dot" hidden="{{item.hideRedDot}}"/>
+          </view>
+        </view>
+      </repeat>
+    </view>
+
+    <view wx:if="{{showInputView}}" style="position: fixed; height: 50px; width: 100%; bottom: 0px; left: 0px; background-color: white;">
+      <input
+        style="height: 34px; margin: 9px 12px 7px 12px;padding: 0px 9px; border-radius: 4px;border: 0.5px solid rgba(0,0,0,0.15);"
+        value="{{initInputValue}}"
+        placeholder="{{placeHolder}}"
+        cursor-spacing="{{0}}"
+        focus="{{focus}}"
+        bindblur="bindblur"
+        bindconfirm="bindconfirm"
+      />
+    </view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import ExperienceItem from '../../../components/experience-item'
+  import ReplyItem from '../../../components/reply-item'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '空间动态'
+    }
+
+    components = {
+      experienceitem: ExperienceItem,
+      replyitem: ReplyItem
+    }
+
+    data = {
+      showInputView: false,
+      placeHolder: '',
+      initInputValue: '',
+      replyInfo: {
+        userId: 0,
+        replyText: ''
+      },
+      focus: true,
+      tabs: [
+        {
+          type: 'experience',
+          title: '心得',
+          titleColor: '#ff7733',
+          titleBold: 'bold',
+          indicatorColor: '#ff7733',
+          showIndicator: true,
+          hideRedDot: true
+        },
+        {
+          type: 'reply',
+          title: '回复',
+          titleColor: '#222222',
+          titleBold: 'normal',
+          indicatorColor: 'transparent',
+          showIndicator: false,
+          hideRedDot: false
+        },
+        {
+          type: 'praise',
+          title: '点赞',
+          titleColor: '#222222',
+          titleBold: 'normal',
+          indicatorColor: 'transparent',
+          showIndicator: false,
+          hideRedDot: false
+        }
+      ],
+      scrollToView: 'experience',
+
+      experienceList: [
+        {
+          dynamicType: 'experience',
+          replyType: 'experience',
+          userName: '叶问',
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍'
+        },
+        {
+          dynamicType: 'experience',
+          replyType: 'experience',
+          userName: '叶问',
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍'
+        },
+        {
+          dynamicType: 'experience',
+          replyType: 'experience',
+          userName: '叶问',
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍'
+        },
+        {
+          dynamicType: 'experience',
+          replyType: 'reply',
+          userName: '叶问',
+          headImage: '../../../images/test.png',
+          experienceName: '',
+          askUserName: '叶问',
+          askContent: '阿技术的开发环境撒开房间看啥地方哈框架收到尽快发哈就开始倒海翻江阿斯顿发好几个撒的合法身份更好阿斯顿减肥开始啦大家发撒肌肤'
+        }
+      ],
+
+      replyList: [
+        {
+          dynamicType: 'reply',
+          replyType: 'experience',
+          dateTime: '09月23日',
+          userName: '叶问',
+          userId: 1,
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍',
+          spaceName: '日本七日游',
+          content: '这家确实很好次，强烈推荐～'
+        },
+        {
+          dynamicType: 'reply',
+          replyType: 'experience',
+          dateTime: '09月23日',
+          userName: '李小龙',
+          userId: 2,
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍',
+          spaceName: '日本七日游',
+          content: '这家确实很好次，强烈推荐～'
+        },
+        {
+          dynamicType: 'reply',
+          replyType: 'experience',
+          dateTime: '09月23日',
+          userName: '黄飞鸿',
+          userId: 3,
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍',
+          spaceName: '日本七日游',
+          content: '这家确实很好次，强烈推荐～'
+        },
+        {
+          dynamicType: 'reply',
+          replyType: 'reply',
+          dateTime: '09月23日',
+          userName: '霍元甲',
+          userId: 4,
+          headImage: '../../../images/test.png',
+          content: '这家确实很好次，强烈推荐～',
+          spaceName: '日本七日游',
+          askUserName: '叶问',
+          askContent: '阿技术的开发环境撒开房间看啥地方哈框架收到尽快发哈就开始倒海翻江阿斯顿发好几个撒的合法身份更好阿斯顿减肥开始啦大家发撒肌肤'
+        }
+      ],
+
+      praiseList: [
+        {
+          dynamicType: 'praise',
+          replyType: 'experience',
+          userName: '叶问',
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍'
+        },
+        {
+          dynamicType: 'praise',
+          replyType: 'experience',
+          userName: '叶问',
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍'
+        },
+        {
+          dynamicType: 'praise',
+          replyType: 'experience',
+          userName: '叶问',
+          headImage: '../../../images/test.png',
+          experienceName: '东京的地铁乘坐秘籍'
+        },
+        {
+          dynamicType: 'praise',
+          replyType: 'reply',
+          userName: '叶问',
+          headImage: '../../../images/test.png',
+          askUserName: '叶问',
+          askContent: '阿技术的开发环境撒开房间看啥地方哈框架收到尽快发哈就开始倒海翻江阿斯顿发好几个撒的合法身份更好阿斯顿减肥开始啦大家发撒肌肤'
+        }
+      ]
+    }
+
+    computed = {
+      getScreenHeight() {
+        return this.$parent.globalData.screenHeight - 170
+      },
+      checkExperienceStatus() {
+        return (this.scrollToView === 'experience')
+      },
+      checkReplyStatus() {
+        return (this.scrollToView === 'reply')
+      },
+      checkPraiseStatus() {
+        return (this.scrollToView === 'praise')
+      },
+      checkIsEmptyStatus() {
+        switch (this.scrollToView) {
+          case 'experience':
+            return !(this.experienceList && this.experienceList.length > 0)
+          case 'reply':
+            return !(this.replyList && this.replyList.length > 0)
+          case 'praise':
+            return !(this.praiseList && this.praiseList.length > 0)
+          default:
+            return true
+        }
+      },
+      getBackgroundColor() {
+        return this.checkIsEmptyStatus ? 'white' : 'transparent'
+      }
+    }
+
+    methods = {
+      clickedCurrentTab(num, evt) {
+        let currentTab = num.currentTarget.id
+        if (this.scrollToView !== currentTab) {
+          this.tabs = this.methods.switchTab(this.scrollToView, currentTab, this.tabs)
+          this.scrollToView = currentTab
+        }
+      },
+      switchTab(lastTab, currentTab, tabs) {
+        if (lastTab !== currentTab) { // 点击同一个tab，不响应
+          tabs.forEach((item, index) => {
+            if (item.type === lastTab) {
+              item.titleColor = '#222222'
+              item.titleBold = 'normal'
+              item.indicatorColor = 'transparent'
+              item.showIndicator = false
+              item.hideRedDot = false
+            } else if (item.type === currentTab) {
+              item.titleColor = '#FF7733'
+              item.titleBold = 'bold'
+              item.indicatorColor = '#FF7733'
+              item.showIndicator = true
+              item.hideRedDot = true
+            }
+          })
+        }
+        return tabs
+      },
+
+      clickedReplyButton(value, evt) {
+        if (this.replyInfo.userId === 0 || this.replyInfo.userId !== value.userId) {
+          // 如果和上一次不是同一人，则重置；（由于在真机调试中，this.replyInfo.replyText无法正常给input赋值，所以这里使用了中间变量）
+          this.replyInfo.replyText = this.initInputValue = ''
+          this.replyInfo.userId = value.userId
+        } else {
+          this.initInputValue = this.replyInfo.replyText
+        }
+
+        this.placeHolder = `回复${value.userName}`
+        this.showInputView = true
+      },
+      bindblur(item) {
+        // 失焦，保存当前已输入文本
+        this.replyInfo.replyText = item.detail.value
+        this.showInputView = false
+      },
+      bindconfirm(item) {
+
+        let replyText = item.detail.value
+
+        this.replyInfo.replyText = ''
+        this.replyInfo.userId = 0
+
+        if (replyText === undefined || replyText === '') {
+          return
+        }
+
+        wx.showLoading({
+          title: '回复中...'
+        })
+
+        setTimeout(() => {
+          wx.hideLoading()
+          wx.showToast({
+            title: '回复成功',
+            icon: 'success',
+            duration: 2000
+          })
+          this.showInputView = false
+        }, 2000)
+      }
+    }
+
+    onLoad() {
+
+    }
+  }
+</script>

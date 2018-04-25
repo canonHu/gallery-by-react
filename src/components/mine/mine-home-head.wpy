@@ -1,0 +1,84 @@
+<style lang="less">
+	.mine-home__head {
+		width: 100%;
+		padding-bottom: 4px;
+		background-color: #ffffff;
+
+		&--box {
+			margin-top: 36px;
+			position: relative;
+		}
+
+		&--images {
+			width: 60px;
+			height: 60px;
+			overflow: hidden;
+			border-radius: 30px;
+		}
+
+		&--image {
+			width: 60px;
+			height: 60px;
+			display: block;
+		}
+
+		&--edit {
+			right: 0;
+			bottom: 0;
+			width: 24px;
+			height: 24px;
+			display: block;
+			position: absolute;
+		}
+
+		.name {
+			color: #222222;
+			margin-top: 3px;
+			font-size: 18px;
+			line-height: 25px;
+			font-weight: bold;
+		}
+	}
+</style>
+
+
+<template>
+	<view class="mine-home__head">
+		<view class="center">
+			<view class="mine-home__head--box">
+				<view class="mine-home__head--images">
+					<image
+					class="mine-home__head--image"
+					src="{{ userInfo.headImg }}"></image>
+				</view>
+				<image
+					class="mine-home__head--edit"
+					src="../../images/tn-wx-mine-edit.png"
+					data-num="{{number}}"
+					@tap="changeName"
+				></image>
+			</view>
+		</view>
+		<view class="center name">
+			<text>{{ name }}</text>
+		</view>
+		<!-- <text class="center phone">184****2346</text> -->
+	</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Releaseitems extends wepy.component {
+    props = {
+      name: String,
+      userInfo: Object
+		}
+
+		methods = {
+			changeName() {
+				this.$emit('toChangeName', {})
+			}
+		}
+	}
+</script>

@@ -1,0 +1,99 @@
+
+  <view>
+    <view>
+      <view class="input-view">
+        <image src="../../../images/tn-wx-search-search.png" style="width: 14px; height: 14px; margin-right: 5px;"/>
+        <input style="font-size: 14px; color: #333333; flex: 1;" value="{{searchKeyword}}" placeholder="目的地/关键词" placeholder-style="color: #CCCCCC; font-size: 14px;" bindinput="bindinput" bindconfirm="bindconfirm"/>
+        <view  wx:if="{{searchKeyword !== ''}}" bindtap="clickedClearSearchKeyword">
+          <image src="../../../images/tn-wx-search-clear.png" style="width: 15px; height: 15px;"/>
+        </view>
+      </view>
+    </view>
+
+
+    <!--联想状态下-->
+    <scroll-view  wx:if="{{isSearching}}">
+      <block wx:for="{{searchResults}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+        
+  <view class="space-detail-item-view" bindtap="$listItem$tapEvent" data-com-index="{{index}}">
+
+    <view class="space-detail-content-view">
+      <!--标题-->
+      <view class="space-detail-content-title">
+        <view class="space-detail-content-title-view">
+          <text class="space-detail-content-title-text">{{item.title}}</text>
+          <view  wx:if="{{item.hasQuote}}" class="space-detail-quote-tip-view">
+            <text class="space-detail-quote-tip">引用</text>
+          </view>
+        </view>
+        <view catchtap="$listItem$tapMoreEvent" id="{{'more_' + $listItem$index}}" class="space-detail-content-title-dots" data-com-index="{{index}}">
+          <image src="../../../images/tn-wx-space-detail-item-dots.png" style="width: 20px; height: 4px;"/>
+        </view>
+      </view>
+
+      <!-- 内容 -->
+      <view  wx:if="{{$listItem$getShowContentText !== ''}}" style="margin-top: 8px;">
+        <text class="space-detail-content-content-text">{{item.simpleContent}}</text>
+      </view>
+
+      <!--图片-->
+      <view wx:if="{{ item.simpleImgs !== $listItem$undefined && item.simpleImgsCount > 0 }}" style="margin-top: 8px;">
+        <view wx:if="{{item.simpleImgsCount === 1}}">
+          <image src="{{item.simpleImgs[0].imgUrl}}" mode="aspectFill" style="width: 100%; height: 146px; background-color: rebeccapurple"/>
+        </view>
+        <view wx:else style="position: relative; margin-left: -9px; display: flex; flex-direction: row;">
+          <block wx:for="{{item.simpleImgs}}" wx:for-index="$listItem$index" wx:for-item="$listItem$item" wx:key="$listItem$index">
+            <image src="{{$listItem$item.imgUrl}}" mode="aspectFill" style="width: 109px; height: 109px; margin-left: 9px; background-color: rebeccapurple;"/>
+          </block>
+          <view wx:if="{{item.simpleImgsCount > 3}}" class="space-detail-img-total">
+            <text class="space-detail-img-total-text">共{{item.simpleImgsCount}}张</text>
+          </view>
+        </view>
+      </view>
+
+      <!--用户信息-->
+      <view class="space-detail-user-info-view">
+        <view class="space-detail-user-info">
+          <image src="{{item.userInfo.headImage}}" style="width: 24px; height: 24px;"/>
+          <view class="space-detail-user-text-info">
+            <text class="space-detail-user-name">{{item.userInfo.nickName}}</text>
+            <text class="space-detail-date-time">{{item.publishTime}}</text>
+          </view>
+        </view>
+
+        <view class="space-detail-content-pv-view">
+          <view style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <text class="space-detail-content-pv-count-text">{{item.pvStr}}</text>
+            <image src="../../../images/tn-wx-space-detail-pv-line.png" style="width: 100%; height: 4px; margin-top: 2px;"/>
+          </view>
+          <text class="space-detail-content-pv-text"> 浏览</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="space-detail-blank-style"/>
+  </view>
+
+      </block>
+    </scroll-view>
+
+    <view wx:else>
+      
+  <view wx:if="{{historyList.length > 0}}">
+    <view class="local-title-view">
+      <text class="title-text">{{$sectionView$title}}</text>
+      <view  wx:if="{{$sectionView$showClear}}" bindtap="$sectionView$clickedClearLocalButton">
+        <text class="local-title-clear">清除</text>
+      </view>
+    </view>
+    <view class="local-content-view">
+      <block wx:for="{{$sectionView$dataList}}" wx:for-index="$sectionView$index" wx:for-item="$sectionView$item" wx:key="$sectionView$index">
+        <view class="local-item" data-index="{{$sectionView$index}}" bindtap="$sectionView$clickedCurrentPoi">
+          <text class="local-item-text">{{$sectionView$isPoiList ? $sectionView$item.poiName : $sectionView$item.keyName}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+    </view>
+  </view>

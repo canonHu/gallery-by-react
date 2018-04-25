@@ -1,0 +1,190 @@
+<style type="less">
+  .reply-container {
+    margin-top: 10px;
+    padding-bottom: 10.5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: #ffffff;
+    position: relative;
+  }
+
+  .reply-head-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 100px;
+    margin-top: 12px;
+  }
+
+  .reply-content-view {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    margin-top: 12px;
+  }
+
+  .reply-user-name {
+    margin-left: 8px;
+    margin-top: 1px;
+    color: #333333;
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .reply-content-text {
+    margin-left: 8px;
+    margin-top: 4px;
+    color: #000000;
+    font-size: 14px;
+    line-height: 17px;
+  }
+
+  .reply-date-text {
+    margin-left: 8px;
+    margin-top: 1px;
+    color: #A5A5A5;
+    font-size: 12px;
+  }
+
+  .reply-view {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 24px;
+    border-radius: 100px;
+    border: 0.5px solid #65ABFC;
+  }
+
+  .reply-text {
+    color: #65ABFC;
+    font-size: 14px;
+  }
+
+  .reply-other-view {
+    margin-left: 8px;
+    background-color: #F2F4F7;
+    border-radius: 2px;
+    padding: 6px 10px 9px 10px;
+  }
+
+  .reply-other-content {
+    font-size: 13px;
+    color: #666666;
+    line-height: 18px;
+    display: -webkit-box;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .reply-other-user {
+    color: #666666;
+    font-weight: bold;
+  }
+
+  .reply-other-experience {
+    font-size: 14px;
+    color: #666666;
+    line-height: 20px;
+    display: -webkit-box;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .reply-triangle-view {
+    margin-left: 35px;
+    display: flex;
+    align-items: center;
+  }
+
+  .source-view {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4.5px
+  }
+
+  .source-text {
+    font-size: 12px;
+    color: #999999;
+  }
+</style>
+
+<template>
+  <view class="reply-container" @tap="clickedSimpleItem" id="index">
+    <view class="reply-head-image">
+      <image src="{{item.headImage}}" style="width: 48px; height: 48px;"/>
+    </view>
+    <view class="reply-content-view">
+      <text class="reply-user-name">{{item.userName}}</text>
+
+      <!--日期-->
+      <text class="reply-date-text">{{item.dateTime}}</text>
+
+      <!--动态内容-->
+      <text class="reply-content-text">{{item.content}}</text>
+
+      <!--动态产生的来源-->
+      <view>
+        <view class="reply-triangle-view">
+          <image
+            src="../images/tn-wx-dynamic-item-reply-triangle.png"
+            style="width: 14px; height: 8px;"
+          />
+        </view>
+        <view class="reply-other-view">
+          <!-- 回复心得 -->
+          <text wx:if="{{item.replyType === 'experience'}}" class="reply-other-experience">{{item.experienceName}}>>></text>
+          <!-- 回复别人的回复 -->
+          <text wx:if="{{item.replyType === 'reply'}}" class="reply-other-content"><text class="reply-other-user">{{item.askUserName}}：</text>{{item.askContent}}</text>
+        </view>
+      </view>
+
+      <view class="source-view">
+        <text class="source-text">来源于[{{item.spaceName}}]空间</text>
+      </view>
+    </view>
+    <view class="reply-view" @tap="clickedReplyButton">
+      <text class="reply-text">回复</text>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class ReplyItem extends wepy.component {
+    props = {
+      item: Object
+    }
+
+    data = {
+    }
+
+    computed = {}
+
+    methods = {
+      clickedSimpleItem(num, evt) {
+        this.$emit('clickedSimpleItem', this.item)
+      },
+      clickedReplyButton(num, evt) {
+        this.$emit('replyEvent', this.item)
+      }
+    }
+
+    onLoad() {
+
+    }
+  }
+</script>

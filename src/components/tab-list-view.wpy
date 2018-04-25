@@ -1,0 +1,87 @@
+<style type="less">
+  .tab-list-view {
+    background-color: #EDF0F5;
+    width: 100%;
+    padding-top: 14px;
+    padding-left: 5px;
+    padding-right: 14px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .tab-list-button {
+    border-radius: 2px;
+    margin-bottom: 12px;
+    margin-left: 9px;
+    padding-left: 25px;
+    padding-right: 25px;
+    height: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .tab-list-view-tab-text {
+    font-size: 14px;
+  }
+
+</style>
+
+<template>
+  <view class="tab-list-view">
+    <repeat for="{{tabs}}" key="index" index="index">
+      <view
+        id="{{index}}"
+        @tap="tapEvent"
+        class="tab-list-button"
+        style="background-color: {{selectIndex === index ? selectBackColor : defaultBackColor}}; border: 0.5px solid {{selectIndex === index ? selectBorderColor : defaultBorderColor}}">
+        <text class="tab-list-view-tab-text" style="color: {{selectIndex === index ? selectTitleColor : defaultTitleColor}}; font-weight: {{selectIndex === index ? selectTitleBold : defaultTitleBold}}">{{item.name}}</text>
+      </view>
+    </repeat>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class TabListView extends wepy.component {
+    props = {
+      tabs: {
+        type: Object,
+        default: []
+      },
+      selectIndex: {
+        type: Number,
+        default: 0
+      },
+      defaultBackColor: String,
+      defaultTitleColor: String,
+      defaultTitleBold: String,
+      defaultBorderColor: String,
+      selectBackColor: String,
+      selectTitleColor: String,
+      selectTitleBold: String,
+      selectBorderColor: String
+    }
+
+    data = {}
+
+    computed = {
+    }
+
+    methods = {
+      tapEvent(num, evt) {
+        let index = parseInt(num.currentTarget.id)
+        if (this.selectIndex !== index) {
+          this.selectIndex = index
+          let item = this.tabs[index]
+          // invoke： 组件路径需加上前缀'/'，同时组件名为page中所重定义的名字
+          this.$invoke('/tablist', 'changeCurrentTab', index)
+          this.$emit('tapEvent', {index: index, info: item})
+        }
+      }
+    }
+
+    onLoad() {}
+  }
+</script>

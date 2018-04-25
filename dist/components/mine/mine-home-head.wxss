@@ -1,0 +1,35 @@
+.mine-home__head {
+  width: 100%;
+  padding-bottom: 4px;
+  background-color: #ffffff;
+}
+.mine-home__head--box {
+  margin-top: 36px;
+  position: relative;
+}
+.mine-home__head--images {
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  border-radius: 30px;
+}
+.mine-home__head--image {
+  width: 60px;
+  height: 60px;
+  display: block;
+}
+.mine-home__head--edit {
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  height: 24px;
+  display: block;
+  position: absolute;
+}
+.mine-home__head .name {
+  color: #222222;
+  margin-top: 3px;
+  font-size: 18px;
+  line-height: 25px;
+  font-weight: bold;
+}

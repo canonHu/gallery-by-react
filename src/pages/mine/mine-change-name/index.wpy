@@ -1,0 +1,147 @@
+<style lang="less">
+  page {
+    background-color: #f6f6f6;
+  }
+
+  .center {
+    display: flex;
+    justify-content: center;
+  }
+
+  .change-name {
+    &__head {
+      display: flex;
+      padding-left: 15px;
+      background-color: #ffffff;
+
+      &--name {
+        height: 48px;
+        flex-grow: 1;
+        color: #999999;
+        line-height: 48px;
+        box-sizing: border-box;
+      }
+
+      &--image {
+        width: 20px;
+        display: flex;
+        padding-right: 15px;
+        flex-direction: row-reverse;
+
+        .delete {
+          width: 12.7px;
+          height: 12.7px;
+          display: block;
+          margin-top: 18.1px;
+        }
+      }
+    }
+
+    &__foot {
+        .center;
+
+        margin-top: 96px;
+
+        &--btn {
+          width: 335px;
+          height: 44px;
+          color: #ffffff;
+          line-height: 44px;
+          text-align: center;
+          border-radius: 22px;
+          background: #ff7733;
+          box-shadow: -1px 6px 13px 0 rgba(255, 111, 10, 0.30);
+        }
+    }
+
+    
+  }
+</style>
+
+<template>·
+	<view class="change-name">
+    <view class="change-name__head">
+      <input
+        type="text"
+        value="{{ name }}"
+        class="change-name__head--name"
+        bindinput="changeNick"
+        maxlength="16"
+      />
+      <view class="change-name__head--image">
+        <image
+          src="../../../images/tn-wx-search-clear.png"
+          class="delete"
+          @tap="deleteName"
+        ></image>
+      </view>
+    </view>
+    <view class="change-name__foot">
+      <view
+        class="change-name__foot--btn"
+        @tap="getNewName"
+      >完成</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import { getStore } from 'wepy-redux'
+  import { changeMineName } from '../../../store/actions'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '修改昵称',
+      avigationBarBackgroundColor: '#ffffff'
+    }
+
+    data = {
+      name: '',
+      userId: 0,
+      nickName: '',
+      store: getStore()
+    }
+
+    methods = {
+      getNewName() {
+        const payload = {
+          nickname: this.name,
+          userId: this.userId
+        }
+        let len = this.name.length
+        if (len > 16) {
+          wx.showToast({
+            title: '昵称长度不能超过16个字',
+            icon: 'none',
+            duration: 2000
+          })
+        } else if (len < 1) {
+          wx.showToast({
+            title: '请输入昵称',
+            icon: 'none',
+            duration: 2000
+          })
+        } else {
+          this.store
+            .dispatch(changeMineName.apply(this.store, [payload])).then((res) => {
+              wx.navigateBack()
+            })
+        }
+      },
+
+      deleteName() {
+        this.name = ''
+      },
+
+      changeNick(e) {
+        this.name = e.detail.value
+      }
+    }
+
+    onLoad(options) {
+      this.name = options.name
+      this.userId = options.userId
+    }
+  }
+</script>

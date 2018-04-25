@@ -1,0 +1,136 @@
+<style type="less">
+  .tab-view {
+    width: 100%;
+    white-space: nowrap;
+    height: 47px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    color: transparent;
+  }
+
+  .tab-item {
+    display: inline-block;
+    height: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .tab-item-back {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .tab-item-back-back {
+    position: relative;
+    bottom: 0px;
+  }
+
+  .tab-item-text {
+    font-size: 16px;
+    margin-bottom: 11px;
+  }
+
+  .tab-identity {
+    border-radius: 100px;
+    width: 100%;
+    height: 3px;
+  }
+
+  .red-dot {
+    background-color: #FF6622;
+    width: 6px;
+    height: 6px;
+    border-radius: 100px;
+  }
+
+  .dot-style {
+    position: absolute;
+    top: 0px;
+    right: -7px;
+  }
+</style>
+
+<template>
+  <scroll-view scroll-x="true" class="tab-view" scroll-into-view="{{toView}}"  scroll-with-animation="true">
+      <repeat for="{{tabs}}" key="index" index="index">
+        <view id="{{'tabitem_' + index}}" class="tab-item" data-index="{{index}}" @tap="clickedSimpleItem">
+          <view class="tab-item-back">
+            <view class="tab-item-back-back">
+              <view style="display: flex; flex-direction: row;">
+                <text
+                  class="tab-item-text"
+                  style="color: {{getCurrentSelect === index ? selectTitleColor : defaultTitleColor}}; font-weight: {{getCurrentSelect === index ? selectTitleBold : defaultTitleBold}}"
+                >{{item.name}}</text>
+              </view>
+              <view
+                class="tab-identity"
+                style="background-color: {{getCurrentSelect === index ? indicatorColor : 'transparent'}}"
+              />
+              <view wx:if="{{getCurrentSelect !== index}}" class="dot-style">
+                <view class="red-dot" hidden="{{!item.hideRedDot}}"/>
+              </view>
+            </view>
+          </view>
+        </view>
+      </repeat>
+  </scroll-view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class TabList extends wepy.component {
+    props = {
+      tabs: {
+        type: Object,
+        default: []
+      },
+      selectIndex: {
+        type: Number,
+        default: 0
+      },
+      defaultTitleColor: String,
+      defaultTitleBold: String,
+      selectTitleColor: String,
+      selectTitleBold: String,
+      indicatorColor: String
+    }
+
+    data = {
+      toView: ''
+    }
+
+    computed = {
+      getCurrentSelect() {
+        if (this.selectIndex >= this.tabs.length) {
+          console.log('warning: Index out of bounds')
+          return
+        }
+        return this.selectIndex !== undefined ? this.selectIndex : 0
+      }
+    }
+
+    methods = {
+      clickedSimpleItem(num, evt) {
+        let index = parseInt(num.currentTarget.dataset.index)
+        if (this.getCurrentSelect !== index) {
+          this.selectIndex = index
+          let item = this.tabs[index]
+          this.toView = 'tabitem_' + index  // 组件id最好都使用英文开头，避免不生效
+          this.$emit('tapEvent', {index: index, info: item})
+        }
+      }
+    }
+
+    onLoad() {}
+
+    changeCurrentTab(index) {
+      this.toView = 'tabitem_' + index
+    }
+  }
+</script>

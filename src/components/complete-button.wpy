@@ -1,0 +1,79 @@
+<style type="less">
+  .back-view {
+    width: 100%;
+    position: fixed;
+    bottom: 0px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .complete-button {
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FF7733;
+  }
+
+  .complete-button-text {
+    font-size: 18px;
+    color: #FFFFFF;
+  }
+
+  .draft-button {
+    width: 32%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FFFFFF;
+  }
+
+  .draft-button-text {
+    font-size: 14px;
+    color: #666666;
+  }
+</style>
+
+<template>
+  <cover-view class="back-view">
+    <cover-view @tap="completeEvent" class="complete-button" style="width: {{getCompleteWidth}}%;">
+      <cover-view class="complete-button-text">{{title}}</cover-view>
+    </cover-view>
+    <cover-view wx:if="{{needDraft}}" @tap="draftEvent" class="draft-button">
+      <cover-view class="draft-button-text">保存草稿箱</cover-view>
+    </cover-view>
+  </cover-view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class SpaceItem extends wepy.component {
+    props = {
+      title: String,
+      needDraft: Boolean
+    }
+
+    data = {}
+
+    computed = {
+      getCompleteWidth() {
+        return this.needDraft ? 68 : 100
+      }
+    }
+
+    methods = {
+      completeEvent(num, evt) {
+        this.$emit('completeEvent', {})
+      },
+      draftEvent(num, evt) {
+        this.$emit('draftEvent', {})
+      }
+    }
+
+    onLoad() {}
+  }
+</script>

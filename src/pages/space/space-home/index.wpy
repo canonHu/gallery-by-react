@@ -1,0 +1,406 @@
+<style lang="less">
+  .header-style {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 39px;
+    padding-top: 42px;
+  }
+
+  .header-info-other-style {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .header-info-first-style {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .space-use-text {
+    font-size: 16px;
+    color: #999999;
+  }
+
+  .space-use-text-normal {
+    margin-top: -5px;
+    font-size: 14px;
+    color: #999999;
+  }
+
+  .space-use-person-text-normal {
+    font-weight: bold;
+    font-size: 44px;
+    color: #4A4C5B;
+  }
+
+  .space-use-person-text {
+    font-size: 18px;
+    color: #4A4A4A;
+    font-weight: bold;
+  }
+
+  .space-button {
+    margin-top: 18px;
+    padding: 9px 40px 10px 41px;
+    border-radius: 100px;
+    background-color: #FF7733;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: -1px 6px 13px 0 rgba(255,111,10,0.30);
+  }
+
+  .space-create-text {
+    font-size: 18px;
+  }
+
+  .title-style {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-bottom: 13px;
+  }
+
+  .title-text-style {
+    font-size: 16px;
+    color: #333333;
+  }
+
+  .title-more-style {
+    font-size: 14px;
+    color: #999999;
+  }
+
+  .more-arrow-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .space-header-title-style {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 17px;
+  }
+
+  .space-title-style {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .space-title-text-style {
+    margin-left: 6px;
+    margin-right: 6px
+  }
+
+  .space-short-line {
+    height: 0px;
+    width: 36px;
+    border-top: 0.5px solid #E9E9E9;
+  }
+
+  .space-long-line {
+    height: 0px;
+    margin-left: 12px;
+    margin-right: 16px;
+    border-top: 0.5px solid #E9E9E9;
+  }
+
+  .space-dynamic-view {
+    margin-bottom: 8px;
+    padding-top: 6px;
+    padding-left: 22px;
+    padding-right: 15px;
+    padding-bottom: 21px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .space-dynamic-details-title {
+    display: flex;
+    align-items: center;
+  }
+
+  .space-dynamic-details-title-text {
+    font-size: 14px;
+    color: #333333;
+  }
+
+  .space-dynamic-details-content {
+    margin-right: 1px;
+    padding-left: 20px;
+    margin-top: 3px;
+    height: 20px;
+    width: 250px;
+  }
+
+  .space-dynamic-details-content-text {
+    display: -webkit-box;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    width: 224px;
+    font-size: 14px;
+    color: #999999;
+  }
+
+  .space-dynamic-details-content-username {
+    font-size: 14px;
+    color: #666666;
+    margin-right: 7px;
+  }
+
+  .space-dynamic-list-entrance {
+    display: flex;
+    align-items: center;
+  }
+
+  .space-dynamic-list-total-count {
+    font-size: 14px;
+    color: #7BB7FD;
+    margin-right: 6px;
+  }
+
+  .more-view {
+    background-color: #ffffff;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: 11px;
+    margin-bottom: 26px;
+  }
+
+  .more-button {
+    width: 100px;
+    height: 30px;
+    border-radius: 100px;
+    border: 0.5px solid rgba(0,0,0,0.10);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .more-text {
+    font-size: 13px;
+    color: #666666;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .center-list {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .history-button {
+    position: fixed;
+    bottom: 22px;
+    right: 10px;
+  }
+</style>
+
+<template>
+  <view>
+    <view class="header-style">
+      <!-- 条件判断：用户名下是否有空间 -->
+      <view wx:if="{{spaceList.length > 0}}" class="header-info-other-style">
+        <view>
+          <text class="space-use-person-text-normal">{{person}}</text>
+        </view>
+        <text class="space-use-text-normal">人正在使用空间</text>
+      </view>
+      <view wx:else class="header-info-other-style" style="margin-bottom: 0px;">
+        <image
+          src="../../../images/tn-wx-space-default.png"
+          style="width: 209px; height: 157px; margin-bottom: 7px; margin-top: -14px;"
+        />
+        <text class="space-use-text"><text class="space-use-person-text">{{person}}</text> 人正在使用空间</text>
+      </view>
+
+      <view class="space-button" @tap="createSpace">
+        <image
+          src="../../../images/tn-wx-space-create.png"
+          style="width: 19px; height: 19px; margin-right: 7px"
+        />
+        <text class="space-create-text">创建空间</text>
+      </view>
+
+    </view>
+
+    <!-- 空间动态 ：当用户名下有空间时显示 -->
+    <view wx:if="{{spaceList.length > 0}}" style="margin-top: 44px;">
+      <view class="space-header-title-style">
+        <view class="space-short-line" />
+        <view class="space-title-text-style">
+          <text class="space-title-style">我的空间</text>
+        </view>
+        <view class="space-short-line" />
+      </view>
+
+      <scroll-view scroll-x="true" style="width: 100%">
+        <view wx:if="{{spaceList.length === 1}}" class="center-list">
+          <spaceitem
+            :index="0"
+            :item="getFirstSpaceInfo"
+            :itemWidth="getImageWidth"
+            @tapEvent.user="clickedSimpleSpace"
+          />
+        </view>
+        <view wx:if="{{spaceList.length > 1}}" class="list">
+          <repeat for="{{spaceList}}" key="index" index="index">
+            <view style="margin-left: 20px;">
+              <spaceitem
+                :index="index"
+                :item="item"
+                :itemWidth="getImageWidth"
+                @tapEvent.user="clickedSimpleSpace"
+              />
+            </view>
+          </repeat>
+        </view>
+      </scroll-view>
+      <view class="more-view">
+        <view class="more-button" @tap="clickedSpaceListMoreButton">
+          <text class="more-text">更多</text>
+          <image
+            src="../../../images/tn-wx-space-arrow.png"
+            style="width: 6px; height: 12px; margin-left: 4px"
+          />
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import SpaceItem from '../../../components/space-item'
+  import test from '../../../utils/test'
+
+  import { getStore } from 'wepy-redux'
+  import { obtainUserInfo, getUsersCount, getSpaceList } from '../../../store/actions'
+  import { SPACE_HOME_USERS } from '../../../store/types/space'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '空间'
+    }
+
+    components = {
+      spaceitem: SpaceItem
+    }
+
+    data = {
+      store: getStore(),
+      hasSpace: true,
+      person: 0,
+      defaultUserImage: '../../../images/test.png',
+      dynamicDatas: [],
+      spaceList: []
+    }
+
+    computed = {
+      getImageWidth() {
+        return this.$parent.globalData.spaceItemWidth
+      },
+      getFirstSpaceInfo() {
+        return this.spaceList[0]
+      }
+    }
+
+    onShow() {
+      let self = this
+      wx.getSetting({
+        success(res) {
+          if (!res.authSetting['scope.userLocation']) {
+            wx.authorize({
+              scope: 'scope.userLocation',
+              success() {
+
+              },
+              fail() {
+
+              }
+            })
+          }
+
+          if (!res.authSetting['scope.userInfo']) {
+            wx.authorize({
+              scope: 'scope.userInfo',
+              success() {
+                self.store.dispatch(obtainUserInfo.apply()).then((e) => {
+                  self.getSpaceHomeInfo()
+                })
+              },
+              fail() {
+                wx.reLaunch({url: '../../../pages/error/authority-fail/index'})
+              }
+            })
+          } else {
+            self.store.dispatch(obtainUserInfo.apply()).then((e) => {
+              self.getSpaceHomeInfo()
+            })
+          }
+        }
+      })
+    }
+
+    getSpaceHomeInfo() {
+      const state = this.store.getState()
+      let userId = state.request.userInfo.userId
+
+      let self = this
+
+      // 请求使用人数
+      this.store.dispatch(getUsersCount.apply(this.store, [userId])).then(() => {
+        self.person = self.store.getState().space.users
+        self.$apply()
+      })
+
+      // 请求空间列表
+      this.store.dispatch(getSpaceList.apply(this.store, [userId])).then(() => {
+        self.spaceList = self.store.getState().space.spaceList
+        self.$apply()
+      })
+    }
+
+    methods = {
+      createSpace(num, evt) {
+        this.$navigate('../create-space/index', {})
+      },
+
+      clickedMoreDynamicButton(num, evt) {
+        this.$navigate('../dynamic-list/index', {})
+      },
+
+      clickedSimpleSpace(num, evt) {
+        this.$navigate('../space-detail/index', {})
+      },
+
+      clickedSpaceListMoreButton(num, evt) {
+        this.$navigate('../space-list/index', {})
+      }
+    }
+  }
+</script>

@@ -1,0 +1,146 @@
+<style lang="less">
+  page {
+    background-color: #f6f6f6;
+  }
+
+  .collection {
+    &-edit {
+      display: flex;
+      color: #333333;
+      font-size: 16px;
+      margin-top: 11px;
+      line-height: 16px;
+      margin-bottom: 7px;
+      padding-right: 15px;
+      flex-direction: row-reverse;
+    }
+
+    .cancel {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 50px;
+      position: fixed;
+      font-size: 18px;
+      line-height: 50px;
+      text-align: center;
+      background-color: #ff7733;
+    }
+  }
+</style>
+
+<template>
+  <view class="collection">
+    <view class="collection-edit">
+      <text @tap="edit">编辑</text>
+    </view>
+    <view class="collection-list">
+      <repeat for="{{ arr }}" key="index" item="item" index="index">
+        <releaseitem
+          :cancelFlag="cancelFlag"
+          :items="item"
+          :index="index"
+          @tapEvent.user="changeedit"
+        ></releaseitem>
+      </repeat>
+    </view>
+    <view
+      @tap="cancel"
+      class="{{ cancel }}"
+      style="color: rgba(255, 255, 255, {{ color }})"
+      wx:if="{{ cancelFlag }}"
+    >取消收藏</view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import { getStore, connect } from 'wepy-redux'
+  import ReleaseItem from '../../../components/release-item'
+  import { CANCEL } from '../../../store/types/mine'
+  
+  @connect({
+    arr (state) {
+      return state.mine.resList
+    }
+  }, {
+  })
+
+  export default class Index extends wepy.page {
+    config = {
+      avigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '我的收藏'
+    }
+
+    components = {
+      releaseitem: ReleaseItem
+    }
+
+    data = {
+      arr: [],
+      color: '0.5',
+      cancelArr: [],
+      imageNumber: 0,
+      imagesList: [],
+      cancel: 'cancel',
+      store: getStore(),
+      cancelFlag: false
+    }
+
+    watch = {
+      arr(newValue, oldValue) {
+        this.cancelArr = []
+        newValue.forEach((item, i) => {
+          if (!item.flag) {
+            this.cancelArr.push(item.userInfo.userId)
+          }
+        })
+        if (this.cancelArr.length === 0) {
+          this.color = '0.5'
+        } else {
+          this.color = '1'
+        }
+      }
+    }
+
+    methods = {
+      edit() {
+        this.cancelFlag = !this.cancelFlag
+      },
+
+      changeedit(num, evt) {
+        if (this.cancelFlag) {
+          this.arr[num.index].flag = !num.flag
+        } else {
+          this.$navigate('../../article/article-detail/index', {
+            id: this.arr[num.index].originId
+          })
+        }
+      },
+
+      cancel() {
+        if (this.color === '1') {
+          this.cancelFlag = false
+          const payloads = {
+            circleId: this.cancelArr,
+            openId: 'lalal',
+            type: 1
+          }
+          this.store.dispatch({
+            type: CANCEL,
+            payloads,
+            name: 'collection'
+          })
+        } else {
+          wx.showToast({
+            title: '请至少选择一项',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      }
+    }
+  }
+</script>

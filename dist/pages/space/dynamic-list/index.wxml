@@ -1,0 +1,142 @@
+
+  <view>
+
+    <scroll-view style="background-color: {{getBackgroundColor}}; margin-top: 50px;">
+      <!--空白view-->
+      <view  wx:if="{{checkIsEmptyStatus}}" class="dynamic-empty-view" style="height: {{getScreenHeight}}px;">
+        <image src="../../../images/tn-wx-dynamic-empty.png" style="width: 251px; height: 162px;"/>
+        <text class="dynamic-empty-text">暂无空间动态</text>
+      </view>
+
+      <view  wx:if="{{checkExperienceStatus}}" style="display: inline-block; width: 100%;">
+        <scroll-view>
+          <block wx:for="{{experienceList}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+            
+  <view class="container" bindtap="$experienceitem$clickedSimpleItem" id="index" data-com-index="{{index}}">
+    <view class="head-image">
+      <image src="{{item.headImage}}" style="width: 48px; height: 48px;"/>
+    </view>
+    <view class="content-view">
+
+      <text class="user-name">{{item.userName}}</text>
+
+      <!--动态内容-->
+      <text  wx:if="{{item.dynamicType === 'experience'}}" class="content-text">在我的空间<text style="color: #000000">【东京七日游】</text>中发布了</text>
+      <text  wx:if="{{item.dynamicType === 'praise'}}" class="praise-content-text">赞了我的{{item.replyType === 'experience' ? '旅行心得' : '回复'}}</text>
+
+      <!--动态产生的来源-->
+      <text wx:if="{{item.replyType === 'experience'}}" class="link-text">{{item.experienceName}}>>></text>
+      <view wx:if="{{item.replyType === 'reply'}}">
+        <view style="margin-left: 35px;display: flex; align-items: center;">
+          <image src="../../../images/tn-wx-dynamic-item-reply-triangle.png" style="width: 14px; height: 8px;"/>
+        </view>
+        <view class="other-view">
+          <text class="other-content"><text class="other-user">{{item.askUserName}}：</text>{{item.askContent}}</text>
+        </view>
+      </view>
+
+    </view>
+    <text class="date-view">09月23日</text>
+  </view>
+
+          </block>
+        </scroll-view>
+      </view>
+
+      <view wx:if="{{checkReplyStatus}}" style="display: inline-block; width: 100%;">
+        <scroll-view>
+          <block wx:for="{{replyList}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+            
+  <view class="reply-container" bindtap="$replyitem$clickedSimpleItem" id="index" data-com-index="{{index}}">
+    <view class="reply-head-image">
+      <image src="{{item.headImage}}" style="width: 48px; height: 48px;"/>
+    </view>
+    <view class="reply-content-view">
+      <text class="reply-user-name">{{item.userName}}</text>
+
+      <!--日期-->
+      <text class="reply-date-text">{{item.dateTime}}</text>
+
+      <!--动态内容-->
+      <text class="reply-content-text">{{item.content}}</text>
+
+      <!--动态产生的来源-->
+      <view>
+        <view class="reply-triangle-view">
+          <image src="../../../images/tn-wx-dynamic-item-reply-triangle.png" style="width: 14px; height: 8px;"/>
+        </view>
+        <view class="reply-other-view">
+          <!-- 回复心得 -->
+          <text  wx:if="{{item.replyType === 'experience'}}" class="reply-other-experience">{{item.experienceName}}>>></text>
+          <!-- 回复别人的回复 -->
+          <text  wx:if="{{item.replyType === 'reply'}}" class="reply-other-content"><text class="reply-other-user">{{item.askUserName}}：</text>{{item.askContent}}</text>
+        </view>
+      </view>
+
+      <view class="source-view">
+        <text class="source-text">来源于[{{item.spaceName}}]空间</text>
+      </view>
+    </view>
+    <view class="reply-view" bindtap="$replyitem$clickedReplyButton" data-com-index="{{index}}">
+      <text class="reply-text">回复</text>
+    </view>
+  </view>
+
+          </block>
+        </scroll-view>
+      </view>
+
+      <view wx:if="{{checkPraiseStatus}}" style="display: inline-block; width: 100%;">
+        <scroll-view>
+          <block wx:for="{{praiseList}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+            
+  <view class="container" bindtap="$experienceitem$clickedSimpleItem" id="index" data-com-index="{{index}}">
+    <view class="head-image">
+      <image src="{{item.headImage}}" style="width: 48px; height: 48px;"/>
+    </view>
+    <view class="content-view">
+
+      <text class="user-name">{{item.userName}}</text>
+
+      <!--动态内容-->
+      <text  wx:if="{{item.dynamicType === 'experience'}}" class="content-text">在我的空间<text style="color: #000000">【东京七日游】</text>中发布了</text>
+      <text  wx:if="{{item.dynamicType === 'praise'}}" class="praise-content-text">赞了我的{{item.replyType === 'experience' ? '旅行心得' : '回复'}}</text>
+
+      <!--动态产生的来源-->
+      <text wx:if="{{item.replyType === 'experience'}}" class="link-text">{{item.experienceName}}>>></text>
+      <view wx:if="{{item.replyType === 'reply'}}">
+        <view style="margin-left: 35px;display: flex; align-items: center;">
+          <image src="../../../images/tn-wx-dynamic-item-reply-triangle.png" style="width: 14px; height: 8px;"/>
+        </view>
+        <view class="other-view">
+          <text class="other-content"><text class="other-user">{{item.askUserName}}：</text>{{item.askContent}}</text>
+        </view>
+      </view>
+
+    </view>
+    <text class="date-view">09月23日</text>
+  </view>
+
+          </block>
+        </scroll-view>
+      </view>
+
+    </scroll-view>
+
+    <!-- tab栏 -->
+    <view class="tabbar-view">
+      <block wx:for="{{tabs}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+        <view class="tabbar-item" id="{{item.type}}" bindtap="clickedCurrentTab">
+          <view class="tabbar-item-back">
+            <text class="tabbar-item-text" style="color: {{item.titleColor}}; font-weight: {{item.titleBold}}">{{item.title}}</text>
+            <view class="tabbar-identity" style="background-color: {{item.indicatorColor}}"/>
+            <view class="red-dot" hidden="{{item.hideRedDot}}"/>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <view wx:if="{{showInputView}}" style="position: fixed; height: 50px; width: 100%; bottom: 0px; left: 0px; background-color: white;">
+      <input style="height: 34px; margin: 9px 12px 7px 12px;padding: 0px 9px; border-radius: 4px;border: 0.5px solid rgba(0,0,0,0.15);" value="{{initInputValue}}" placeholder="{{placeHolder}}" cursor-spacing="{{0}}" focus="{{focus}}" bindblur="bindblur" bindconfirm="bindconfirm"/>
+    </view>
+  </view>

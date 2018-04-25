@@ -1,0 +1,65 @@
+<style lang="less">
+  page {
+    background-color: #f6f6f6;
+  }
+
+  .release {
+    &-list {
+      margin-top: 9px;
+    }
+  }
+</style>
+
+<template>
+  <view class="release">
+    <view class="release-list">
+      <repeat for="{{ arr }}" key="index" item="item" index="index">
+        <releaseitem
+          :items="item" 
+          :index="index"
+          @tapEvent.user="changeedit"
+        ></releaseitem>
+      </repeat>
+    </view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import { connect } from 'wepy-redux'
+  import ReleaseItem from '../../../components/release-item'
+  
+  @connect({
+    arr (state) {
+      return state.mine.resList
+    }
+  }, {
+  })
+
+  export default class Index extends wepy.page {
+    config = {
+      avigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '我的发布'
+    }
+
+    components = {
+      releaseitem: ReleaseItem
+    }
+
+    data = {
+      arr: [],
+      imageNumber: 0,
+      imagesList: []
+    }
+
+    methods = {
+      changeedit(num, evt) {
+        this.$navigate('../../article/article-detail/index', {
+          id: this.arr[num.index].originId
+        })
+      }
+    }
+  }
+</script>

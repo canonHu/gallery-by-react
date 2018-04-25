@@ -1,0 +1,48 @@
+
+  <view>
+    <view>
+      <view class="back-view">
+        <block wx:for="{{list}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+          <view style="margin-left: 21px;">
+            
+  <view class="simple-image-view" bindtap="$spaceitem$tapEvent" id="index" style="padding-bottom: {{$spaceitem$getSpaceSize}}px;" data-com-index="{{index}}">
+    <view class="simple-image">
+      <image src="{{item.coverImageUrl}}" style="border-radius: 2px; width: {{$spaceitem$getImageWidth}}px; height: 150px;box-shadow: 0px 6px 8px rgba(0,0,0,0.1);" mode="aspectFill"/>
+      <image class="mask-image" src="../../../images/tn-wx-space-mask.png"/>
+      <view class="simple-image-text">
+        <text class="chinese-name">{{item.spaceName}}</text>
+      </view>
+
+      <!--<!&ndash;是否有最新空间&ndash;&gt;-->
+      <!--<view wx:if="{{item.hasNew}}" class="new-view">-->
+        <!--<image-->
+          <!--src="../images/tn-wx-space-item-status-new.png"-->
+          <!--style="width: 28px; height: 14px;"/>-->
+      <!--</view>-->
+
+      <!--是否仅自己可见-->
+      <view  wx:if="{{item.authority !== 0}}" class="only-self-view">
+        <image src="../../../images/tn-wx-space-item-onlyself-mask.png" style="width: 49px; height: 14px;"/>
+        <text class="only-self-text">仅自己可见</text>
+      </view>
+
+      <view  wx:if="{{addSpace}}" class="select-style">
+        <image wx:if="{{item.selected}}" src="../../../images/tn-wx-space-item-select-true.png" style="width: 20px; height: 20px;"/>
+        <image wx:else src="../../../images/tn-wx-space-item-select-false.png" style="width: 20px; height: 20px;"/>
+      </view>
+    </view>
+    <view style="margin-top: -5px;">
+      <text class="look-text"><text class="attribute-look-text">{{item.pv}}</text>人浏览</text>
+    </view>
+  </view>
+
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <view style="height: 50px;"/>
+    <view  wx:if="{{addSpace}}" bindtap="clickedCompleteButton" class="complete-button">
+      <text class="complete-button-text">确认</text>
+    </view>
+  </view>

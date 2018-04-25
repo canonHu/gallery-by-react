@@ -1,0 +1,70 @@
+
+  <view>
+    <view>
+      <view class="input-view">
+        <image src="../../../images/tn-wx-search-search.png" style="width: 14px; height: 14px; margin-right: 5px;"/>
+        <input style="font-size: 14px; color: #333333; flex: 1;" value="{{searchKeyword}}" placeholder="目的地/关键词" placeholder-style="color: #CCCCCC; font-size: 14px;" bindinput="bindinput" bindconfirm="bindconfirm"/>
+        <view  wx:if="{{searchKeyword !== ''}}" bindtap="clickedClearSearchKeyword">
+          <image src="../../../images/tn-wx-search-clear.png" style="width: 15px; height: 15px;"/>
+        </view>
+      </view>
+    </view>
+
+
+    <!--联想状态下-->
+    <view  wx:if="{{isSearching}}">
+      <block wx:for="{{searchResults}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+        <view class="association-item" data-info="{{item.poiName}}" bindtap="clickedCurrentPoi">
+          <text class="association-item-text">{{item.poiName}}</text>
+        </view>
+        <view class="association-line"/>
+      </block>
+    </view>
+
+    <!--默认状态下 最近 热门推荐-->
+    <view wx:else>
+
+      <view wx:if="{{locationName !== '' && locationName !== undefined}}">
+        <view class="location-title-view">
+          <tex class="title-text">当前定位城市</tex>
+        </view>
+        <view class="local-content-view">
+          <view class="location-title-item" data-type="location" bindtap="clickedCurrentPoi">
+            <image src="../../../images/tn-wx-destination-location.png" style="width: 12px; height: 13px; margin-right: 5px;"/>
+            <text class="location-item-text">{{locationName}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{historyPOIList.length > 0}}">
+        <view class="local-title-view">
+          <text class="title-text">{{historyTitle}}</text>
+          <view bindtap="clickedClearLocalButton">
+            <text class="local-title-clear">清除</text>
+          </view>
+        </view>
+        <view class="local-content-view">
+          <block wx:for="{{historyPOIList}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+            <view class="local-item" data-type="history" data-index="{{index}}" bindtap="clickedCurrentPoi">
+              <text class="local-item-text">{{item.poiName}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <view wx:if="{{recommendList.length > 0}}">
+        <view class="recommend-title-view">
+          <tex class="title-text">推荐目的地</tex>
+        </view>
+        <view class="recommend-content-view">
+          <block wx:for="{{recommendList}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+            <view class="local-item" data-type="recommend" data-index="{{index}}" bindtap="clickedCurrentPoi">
+              <text class="local-item-text">{{item.poiName}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+
+    </view>
+
+  </view>

@@ -1,0 +1,114 @@
+
+  <view>
+    <view class="header-style">
+      <!-- 条件判断：用户名下是否有空间 -->
+      <view  wx:if="{{spaceList.length > 0}}" class="header-info-other-style">
+        <view>
+          <text class="space-use-person-text-normal">{{person}}</text>
+        </view>
+        <text class="space-use-text-normal">人正在使用空间</text>
+      </view>
+      <view  wx:else class="header-info-other-style" style="margin-bottom: 0px;">
+        <image src="../../../images/tn-wx-space-default.png" style="width: 209px; height: 157px; margin-bottom: 7px; margin-top: -14px;"/>
+        <text class="space-use-text"><text class="space-use-person-text">{{person}}</text> 人正在使用空间</text>
+      </view>
+
+      <view class="space-button" bindtap="createSpace">
+        <image src="../../../images/tn-wx-space-create.png" style="width: 19px; height: 19px; margin-right: 7px"/>
+        <text class="space-create-text">创建空间</text>
+      </view>
+
+    </view>
+
+    <!-- 空间动态 ：当用户名下有空间时显示 -->
+    <view wx:if="{{spaceList.length > 0}}" style="margin-top: 44px;">
+      <view class="space-header-title-style">
+        <view class="space-short-line"/>
+        <view class="space-title-text-style">
+          <text class="space-title-style">我的空间</text>
+        </view>
+        <view class="space-short-line"/>
+      </view>
+
+      <scroll-view scroll-x="true" style="width: 100%">
+        <view wx:if="{{spaceList.length === 1}}" class="center-list">
+          
+  <view class="simple-image-view" bindtap="$spaceitem$tapEvent" id="index" style="padding-bottom: {{$spaceitem$getSpaceSize}}px;">
+    <view class="simple-image">
+      <image src="{{$spaceitem$item.coverImageUrl}}" style="border-radius: 2px; width: {{$spaceitem$getImageWidth}}px; height: 150px;box-shadow: 0px 6px 8px rgba(0,0,0,0.1);" mode="aspectFill"/>
+      <image class="mask-image" src="../../../images/tn-wx-space-mask.png"/>
+      <view class="simple-image-text">
+        <text class="chinese-name">{{$spaceitem$item.spaceName}}</text>
+      </view>
+
+      <!--<!&ndash;是否有最新空间&ndash;&gt;-->
+      <!--<view wx:if="{{item.hasNew}}" class="new-view">-->
+        <!--<image-->
+          <!--src="../images/tn-wx-space-item-status-new.png"-->
+          <!--style="width: 28px; height: 14px;"/>-->
+      <!--</view>-->
+
+      <!--是否仅自己可见-->
+      <view  wx:if="{{$spaceitem$item.authority !== 0}}" class="only-self-view">
+        <image src="../../../images/tn-wx-space-item-onlyself-mask.png" style="width: 49px; height: 14px;"/>
+        <text class="only-self-text">仅自己可见</text>
+      </view>
+
+      <view  wx:if="{{$spaceitem$addSpace}}" class="select-style">
+        <image wx:if="{{$spaceitem$item.selected}}" src="../../../images/tn-wx-space-item-select-true.png" style="width: 20px; height: 20px;"/>
+        <image wx:else src="../../../images/tn-wx-space-item-select-false.png" style="width: 20px; height: 20px;"/>
+      </view>
+    </view>
+    <view style="margin-top: -5px;">
+      <text class="look-text"><text class="attribute-look-text">{{$spaceitem$item.pv}}</text>人浏览</text>
+    </view>
+  </view>
+
+        </view>
+        <view wx:if="{{spaceList.length > 1}}" class="list">
+          <block wx:for="{{spaceList}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+            <view style="margin-left: 20px;">
+              
+  <view class="simple-image-view" bindtap="$spaceitem$tapEvent" id="index" style="padding-bottom: {{$spaceitem$getSpaceSize}}px;" data-com-index="{{index}}">
+    <view class="simple-image">
+      <image src="{{item.coverImageUrl}}" style="border-radius: 2px; width: {{$spaceitem$getImageWidth}}px; height: 150px;box-shadow: 0px 6px 8px rgba(0,0,0,0.1);" mode="aspectFill"/>
+      <image class="mask-image" src="../../../images/tn-wx-space-mask.png"/>
+      <view class="simple-image-text">
+        <text class="chinese-name">{{item.spaceName}}</text>
+      </view>
+
+      <!--<!&ndash;是否有最新空间&ndash;&gt;-->
+      <!--<view wx:if="{{item.hasNew}}" class="new-view">-->
+        <!--<image-->
+          <!--src="../images/tn-wx-space-item-status-new.png"-->
+          <!--style="width: 28px; height: 14px;"/>-->
+      <!--</view>-->
+
+      <!--是否仅自己可见-->
+      <view  wx:if="{{item.authority !== 0}}" class="only-self-view">
+        <image src="../../../images/tn-wx-space-item-onlyself-mask.png" style="width: 49px; height: 14px;"/>
+        <text class="only-self-text">仅自己可见</text>
+      </view>
+
+      <view  wx:if="{{$spaceitem$addSpace}}" class="select-style">
+        <image wx:if="{{item.selected}}" src="../../../images/tn-wx-space-item-select-true.png" style="width: 20px; height: 20px;"/>
+        <image wx:else src="../../../images/tn-wx-space-item-select-false.png" style="width: 20px; height: 20px;"/>
+      </view>
+    </view>
+    <view style="margin-top: -5px;">
+      <text class="look-text"><text class="attribute-look-text">{{item.pv}}</text>人浏览</text>
+    </view>
+  </view>
+
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+      <view class="more-view">
+        <view class="more-button" bindtap="clickedSpaceListMoreButton">
+          <text class="more-text">更多</text>
+          <image src="../../../images/tn-wx-space-arrow.png" style="width: 6px; height: 12px; margin-left: 4px"/>
+        </view>
+      </view>
+    </view>
+  </view>

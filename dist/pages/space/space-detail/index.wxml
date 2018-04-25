@@ -1,0 +1,187 @@
+
+  <view>
+    <view style="height: 124px;">
+      <!--背景view-->
+      <image mode="aspectFill" style="width: 100%; height: 124px; background-color: antiquewhite;"/>
+      <!--内容-->
+      <view class="header-view">
+        <view class="content-view">
+          <view class="avatar-view">
+            <image src="../../../images/test-rectangle.png" style="border-radius: 2px;box-shadow: 0 2px 4px 0 rgba(0,0,0,0.23);width: 76px; height: 76px;"/>
+            <view bindtap="clickedEditorSpace" class="editor-button">
+              <image src="../../../images/tn-wx-space-detail-editor.png" style="width: 24px; height: 24px;"/>
+            </view>
+          </view>
+          <view class="content-style">
+            <view class="center">
+              <text class="space-title">日本七日游</text><text class="space-authority">(私密)</text>
+            </view>
+            <text class="space-user">郭麒麟</text>
+            <text class="space-pv-tip">浏览量 <text class="space-pv-count">1817</text></text>
+          </view>
+        </view>
+
+        <view class="search-back-view">
+          <view class="search-button" bindtap="clickedSearchButton">
+            <image src="../../../images/tn-wx-space-detail-search-button.png" style="width: 19px; height: 19px;"/>
+            <text class="search-text">搜索</text>
+          </view>
+        </view>
+
+      </view>
+
+    </view>
+
+    <view class="tab-list">
+      <view style="width: {{getTabViewWidth}}px;">
+        
+  <scroll-view scroll-x="true" class="tab-view" scroll-into-view="{{$tablist$toView}}" scroll-with-animation="true">
+      <block wx:for="{{$tablist$tabs}}" wx:for-index="$tablist$index" wx:for-item="$tablist$item" wx:key="$tablist$index">
+        <view id="{{'tabitem_' + $tablist$index}}" class="tab-item" data-index="{{$tablist$index}}" bindtap="$tablist$clickedSimpleItem">
+          <view class="tab-item-back">
+            <view class="tab-item-back-back">
+              <view style="display: flex; flex-direction: row;">
+                <text class="tab-item-text" style="color: {{$tablist$getCurrentSelect === $tablist$index ? $tablist$selectTitleColor : $tablist$defaultTitleColor}}; font-weight: {{$tablist$getCurrentSelect === $tablist$index ? $tablist$selectTitleBold : $tablist$defaultTitleBold}}">{{$tablist$item.name}}</text>
+              </view>
+              <view class="tab-identity" style="background-color: {{$tablist$getCurrentSelect === $tablist$index ? $tablist$indicatorColor : 'transparent'}}"/>
+              <view  wx:if="{{$tablist$getCurrentSelect !== $tablist$index}}" class="dot-style">
+                <view class="red-dot" hidden="{{!$tablist$item.hideRedDot}}"/>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+  </scroll-view>
+
+      </view>
+
+      <image src="../../../images/tn-wx-space-detail-shadow.png" style="width: 14px; height: 42px;"/>
+      <view bindtap="clickedShowTabListView" class="tab-select">
+        <image src="../../../images/tn-wx-space-tab-more.png" style="width: 14px; height: 8px;"/>
+      </view>
+    </view>
+
+    <view style="position: relative;">
+
+      <view  wx:if="{{list.length > 1}}" class="sort-view">
+        <view>
+          <text class="count-text">共<text>{{list.length}}</text>条信息</text>
+        </view>
+        <view bindtap="clickedSortButton" class="sort-button">
+          <text style="font-size: 14px; color: #999999;">{{sortTypes[currentSort]}}</text>
+          <image src="../../../images/tn-wx-space-detail-sort.png" style="margin-left: 5px;width: 15px; height: 13px;"/>
+        </view>
+      </view>
+
+      <!--有内容-->
+      <scroll-view  wx:if="{{list.length > 1}}">
+        <block wx:for="{{list}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+          
+  <view class="space-detail-item-view" bindtap="$spacedetailitem$tapEvent" data-com-index="{{index}}">
+
+    <view class="space-detail-content-view">
+      <!--标题-->
+      <view class="space-detail-content-title">
+        <view class="space-detail-content-title-view">
+          <text class="space-detail-content-title-text">{{item.title}}</text>
+          <view  wx:if="{{item.hasQuote}}" class="space-detail-quote-tip-view">
+            <text class="space-detail-quote-tip">引用</text>
+          </view>
+        </view>
+        <view catchtap="$spacedetailitem$tapMoreEvent" id="{{'more_' + index}}" class="space-detail-content-title-dots" data-com-index="{{index}}">
+          <image src="../../../images/tn-wx-space-detail-item-dots.png" style="width: 20px; height: 4px;"/>
+        </view>
+      </view>
+
+      <!-- 内容 -->
+      <view  wx:if="{{$spacedetailitem$getShowContentText !== ''}}" style="margin-top: 8px;">
+        <text class="space-detail-content-content-text">{{item.simpleContent}}</text>
+      </view>
+
+      <!--图片-->
+      <view wx:if="{{ item.simpleImgs !== $spacedetailitem$undefined && item.simpleImgsCount > 0 }}" style="margin-top: 8px;">
+        <view wx:if="{{item.simpleImgsCount === 1}}">
+          <image src="{{item.simpleImgs[0].imgUrl}}" mode="aspectFill" style="width: 100%; height: 146px; background-color: rebeccapurple"/>
+        </view>
+        <view wx:else style="position: relative; margin-left: -9px; display: flex; flex-direction: row;">
+          <block wx:for="{{item.simpleImgs}}" wx:for-index="$spacedetailitem$index" wx:for-item="$spacedetailitem$item" wx:key="$spacedetailitem$index">
+            <image src="{{$spacedetailitem$item.imgUrl}}" mode="aspectFill" style="width: 109px; height: 109px; margin-left: 9px; background-color: rebeccapurple;"/>
+          </block>
+          <view wx:if="{{item.simpleImgsCount > 3}}" class="space-detail-img-total">
+            <text class="space-detail-img-total-text">共{{item.simpleImgsCount}}张</text>
+          </view>
+        </view>
+      </view>
+
+      <!--用户信息-->
+      <view class="space-detail-user-info-view">
+        <view class="space-detail-user-info">
+          <image src="{{item.userInfo.headImage}}" style="width: 24px; height: 24px;"/>
+          <view class="space-detail-user-text-info">
+            <text class="space-detail-user-name">{{item.userInfo.nickName}}</text>
+            <text class="space-detail-date-time">{{item.publishTime}}</text>
+          </view>
+        </view>
+
+        <view class="space-detail-content-pv-view">
+          <view style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <text class="space-detail-content-pv-count-text">{{item.pvStr}}</text>
+            <image src="../../../images/tn-wx-space-detail-pv-line.png" style="width: 100%; height: 4px; margin-top: 2px;"/>
+          </view>
+          <text class="space-detail-content-pv-text"> 浏览</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="space-detail-blank-style"/>
+  </view>
+
+        </block>
+      </scroll-view>
+
+      <!--无内容-->
+      <view wx:else class="space-detail-empty-view">
+        <image src="../../../images/tn-wx-dynamic-empty.png" style="width: 251px; height: 162px;"/>
+        <text class="space-detail-empty-text">快来发布新内容</text>
+      </view>
+
+      <!--蒙层框-->
+      <view wx:if="{{showAlert}}" bindtap="clickedMaskBack" class="alert-mask">
+        <view class="alert-back">
+          
+  <view class="alert-view" style="top: {{$alertlist$syncOffsetY}}px;">
+    <view class="alert-arrow">
+      <image src="../../../images/tn-wx-space-detail-alert-arrow.png" style="width: 14px; height: 7px; margin-right: 6px;"/>
+    </view>
+    <view class="alert-content">
+      <block wx:for="{{$alertlist$items}}" wx:for-index="$alertlist$index" wx:for-item="$alertlist$item" wx:key="$alertlist$index">
+        <view bindtap="$alertlist$clickedAlertItem" data-index="{{$alertlist$index}}" class="alert-item">
+          <text style="font-size: 15px; color: {{($alertlist$showSelectStyle && $alertlist$currentSelect === $alertlist$index) ? '#FF7733' : '#333333'}};">{{$alertlist$item}}</text>
+        </view>
+        <view  wx:if="{{$alertlist$index !== ($alertlist$totalCount - 1)}}" class="border"/>
+      </block>
+    </view>
+  </view>
+
+        </view>
+      </view>
+
+      <!--tab栏-->
+      <view  wx:if="{{showTabview}}" bindtap="clickedShowTabListView" class="alert-mask">
+        
+  <view class="tab-list-view">
+    <block wx:for="{{$tablistview$tabs}}" wx:for-index="$tablistview$index" wx:for-item="$tablistview$item" wx:key="$tablistview$index">
+      <view id="{{$tablistview$index}}" bindtap="$tablistview$tapEvent" class="tab-list-button" style="background-color: {{$tablistview$selectIndex === $tablistview$index ? $tablistview$selectBackColor : $tablistview$defaultBackColor}}; border: 0.5px solid {{$tablistview$selectIndex === $tablistview$index ? $tablistview$selectBorderColor : $tablistview$defaultBorderColor}}">
+        <text class="tab-list-view-tab-text" style="color: {{$tablistview$selectIndex === $tablistview$index ? $tablistview$selectTitleColor : $tablistview$defaultTitleColor}}; font-weight: {{$tablistview$selectIndex === $tablistview$index ? $tablistview$selectTitleBold : $tablistview$defaultTitleBold}}">{{$tablistview$item.name}}</text>
+      </view>
+    </block>
+  </view>
+
+      </view>
+    </view>
+
+    <image wx:if="{{showToTop}}" bindtap="clickedTopButton" style="width: 53px; height: 55px; position: fixed; bottom: 142px; right: 8px;" src="../../../images/tn-wx-square-back-icon.png"/>
+
+    <image bindtap="clickedPostButton" src="../../../images/tn-wx-square-post-icon.png" style="width: 65px; height: 65px; position: fixed; bottom: 77px; right: 2px;"/>
+
+  </view>

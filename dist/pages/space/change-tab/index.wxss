@@ -1,0 +1,17 @@
+page {
+  background-color: #EDF0F5;
+}
+.change-tab-border {
+  margin-left: 12px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+}
+.change-tab-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 13px;
+  padding-bottom: 13px;
+  padding-left: 15px;
+  padding-right: 16px;
+}

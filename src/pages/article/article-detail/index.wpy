@@ -1,0 +1,415 @@
+<style type="less">
+  page {
+    background-color: #edf0f5;
+  }
+
+  button[plain]
+  {
+    border:0;
+    background-color: #FFFFFF;
+    display: flex;
+    border-radius: 0;
+  }
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-left: 15px;
+    margin-right: 15px;
+    padding-top: 12px;
+  }
+
+  .header .title {
+    font-size: 20px;
+    color: #333333;
+    font-weight: bold;
+  }
+
+  .header .more-img-view {
+    display: flex;
+    padding-left: 10px;
+    margin-top: 10px;
+  }
+
+  .author {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 15px;
+    padding-top: 14px;
+    padding-bottom: 5px;
+  }
+
+  .author .avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-right: 6px;
+  }
+
+  .author .user-name {
+    color: #666666;
+    font-size: 13px;
+    margin-right: 3px;
+  }
+
+  .author .time-text {
+    font-size: 12px;
+    color: #999999;
+  }
+
+  .footer {
+    width: 100%;
+    height: 50px;
+    flex-direction: row;
+    display: flex;
+    margin-top: 9px;
+  }
+
+  .split-line {
+    width: 2px;
+    height: 100%;
+    background-color: #000000;
+    opacity: 0.1;
+    margin-top: 0.5px;
+    margin-bottom: 0.5px;
+  }
+
+  .alert-mask {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: rgba(0,0,0,0.50);
+    width: 100%;
+    height: 100%;
+  }
+
+  .alert-back {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+  }
+</style>
+
+<template>
+  <view>
+    <view style="background-color: #FFFFFF">
+      <view class="header">
+        <text class="title">{{articleItem.title}}</text>
+        <view wx:if="{{isAuthor}}" class="more-img-view">
+          <image style="width: 20px; height: 4px;"
+                 src="../../../images/tn-wx-space-detail-item-dots.png"
+                 @tap.stop="clickMore"/>
+        </view>
+      </view>
+      <view class="author">
+        <image class="avatar" src="{{articleItem.userInfo.headImage}}"/>
+        <text class="user-name">{{articleItem.userInfo.nickName}}</text>
+        <text class="time-text">{{articleItem.publishTime}}</text>
+      </view>
+      <view>
+        <repeat for="{{articleItem.elements}}" key="index" index="index">
+          <elementitem :data="item"/>
+        </repeat>
+      </view>
+      <poiBottom :poiList.sync="poiList"/>
+    </view>
+    <view class="footer">
+      <button data-name="shareBtn" open-type="share" plain="true">
+        <shareBottom
+          :icon="shareIcon"
+          :name="shareText"
+          :number.sync="shareNum"
+          @clickBottom.user="clickBottom"/>
+      </button>
+      <view class="split-line"/>
+      <collectBottom
+        :icon.sync="collectIcon"
+        :name="collectText"
+        :number.sync="collectNum"
+        @clickBottom.user="clickBottom"/>
+      <view class="split-line"/>
+      <spaceBottom
+        :icon="spaceIcon"
+        :name="spaceText"
+        :number.sync="spaceNum"
+        @clickBottom.user="clickBottom"/>
+    </view>
+    <!--蒙层框-->
+    <view
+      wx:if="{{showAlert}}"
+      @tap="clickedMaskBack"
+      class="alert-mask"
+    >
+      <view class="alert-back">
+        <alertlist
+          :items.sync="currentAlertSource"
+          :syncOffsetY.sync="showAlertOffset"
+          :showSelectStyle.sync="currentAlertSelectStyle"
+          :currentSelect.sync="currentSort"
+          :totalCount.sync="currentAlertSourceCount"
+          @clickedAlertItem.user="clickedAlertItem"
+        />
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import ArticleElement from '../../../components/article-element'
+  import ActionsBottom from '../../../components/actions-bottom'
+  import PoiBottom from '../../../components/poi-bottom'
+  import AlertList from '../../../components/alert-list'
+
+  import { getStore } from 'wepy-redux'
+  import { obtainUserInfo } from '../../../store/actions'
+
+  import test from '../../../utils/test'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '旅行心得'
+    }
+
+    data = {
+      id: 0,
+      articleItem: Object,
+      poiList: [],
+
+      isAuthor: false,
+      userId: 0,
+      isCollect: false,
+      store: getStore(),
+
+      showAlert: false,
+      currentAlertSource: [
+        '编辑',
+        '删除'
+      ],
+      currentAlertSourceCount: 2,
+      currentAlertSelectStyle: true,
+      currentSelectIndex: 0,
+      showAlertOffset: 0,
+
+      shareText: '分享',
+      shareIcon: '../../../images/tn-wx-share.png',
+      shareNum: 633,
+
+      collectText: '收藏',
+      collectIcon: '../../../images/tn-wx-collect-false.png',
+      collectNum: 63,
+
+      spaceText: '添加到空间',
+      spaceIcon: '../../../images/tn-wx-article-addtospace.png',
+      spaceNum: 3
+    }
+
+    computed = {}
+
+    components = {
+      elementitem: ArticleElement,
+      shareBottom: ActionsBottom,
+      collectBottom: ActionsBottom,
+      spaceBottom: ActionsBottom,
+      poiBottom: PoiBottom,
+      alertlist: AlertList
+    }
+
+    methods = {
+      clickMore(num) {
+        this.showAlert = true
+        this.showAlertOffset = num.currentTarget.offsetTop + 7
+        this.$apply()
+      },
+      clickBottom(opt) {
+        switch (opt.name) {
+          case this.shareText:
+            break
+          case this.collectText:
+            this.isCollect = !this.isCollect
+            this.setCollectIcon(false)
+            break
+          case this.spaceText:
+            this.$navigate('../../space/space-list/index?addSpace=true', {})
+            break
+          default:
+            break
+        }
+      },
+      clickedMaskBack() {
+        this.showAlert = false
+      },
+      clickedAlertItem(num, evt) {
+        let index = num.index
+        let self = this
+        switch (index) {
+          case 0: // 编辑
+            break
+          case 1: // 删除
+            wx.showModal({
+              title: '提示',
+              content: '是否确认删除该旅行心得，删除后不可恢复',
+              success: function(res) {
+                if (res.confirm) {
+                  wx.showToast({
+                    title: '心得已删除',
+                    icon: 'none',
+                    duration: 2000
+                  })
+                  setTimeout(function() {
+                    self.$back()
+                  }, 2000)
+                } else if (res.cancel) {
+                }
+              }
+            })
+            break
+          default:
+            break
+        }
+      }
+    }
+
+    onLoad(opts) {
+      if (!opts || opts.id === 0) {
+        return
+      }
+      let self = this
+      this.id = opts.id
+
+      this.isAuthor = true
+      this.articleItem = test.testSpaceListData[0]
+      this.poiList = this.articleItem.poiList
+      this.$apply()
+
+      this.setCollectIcon(true)
+
+      wx.getSetting({
+        success(res) {
+          if (!res.authSetting['scope.userInfo']) {
+            wx.authorize({
+              scope: 'scope.userInfo',
+              success() {
+                self.store.dispatch(obtainUserInfo.apply()).then((e) => {
+                  self.setUserId()
+                })
+              },
+              fail() {
+                wx.reLaunch({url: '../../error/authority-fail/index'})
+              }
+            })
+          } else {
+            self.store.dispatch(obtainUserInfo.apply()).then((e) => {
+              self.setUserId()
+            })
+          }
+        }
+      })
+    }
+
+    setUserId() {
+      const store = getStore()
+      const state = store.getState()
+      this.userId = state.request.userInfo.userId
+      console.log(this.userId)
+      if(this.articleItem.userInfo.userId === this.userId) {
+        this.isAuthor = true
+      } else {
+        this.isAuthor = false
+      }
+    }
+
+    onShareAppMessage(options) {
+      let self = this
+      let shareObj = {
+        title: '你想知道的都在这里',
+        path: '/pages/article/article-detail/index?id=' + this.id,
+        success: function (res) {
+          if (res.errMsg === 'shareAppMessage:ok') {
+            self.shareNum = self.shareNum + 1
+            self.$apply()
+          }
+        },
+        fail: function (res) {
+          // 转发失败之后的回调
+          if (res.errMsg === 'shareAppMessage:fail cancel') {
+            // 用户取消转发
+          } else if (res.errMsg === 'shareAppMessage:fail') {
+            // 转发失败，其中 detail message 为详细失败信息
+          }
+        },
+        complete: function () {
+
+        }
+      }
+      return shareObj
+    }
+
+    setCollectIcon(isInit) {
+      if (this.isCollect) {
+        this.collectIcon = '../../../images/tn-wx-collect-true.png'
+        if (!isInit) {
+          this.collectNum = this.collectNum + 1
+          wx.showToast({
+            title: '收藏成功',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      } else {
+        this.collectIcon = '../../../images/tn-wx-collect-false.png'
+        if (!isInit) {
+          this.collectNum = this.collectNum - 1
+          wx.showToast({
+            title: '取消收藏',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      }
+    }
+
+    addSpace(spaceList) {
+      let self = this
+      let data = {
+        originId: [this.id],
+        spaceId: spaceList,
+        userId: this.userId,
+        type: this.isAuthor ? 0 : 1
+      }
+      wx.request({
+        url: `http://cmt-tgsp.api.tuniu-sst.org/tgsp/space/articleMove?${JSON.stringify(data)}`,
+        success: function (res) {
+          let response = res.data
+          if(response.success && response.data && response.data.res) {
+            wx.showToast({
+              title: '添加成功',
+              icon: 'none',
+              duration: 2000
+            })
+            self.spaceNum = self.spaceNum + spaceList.length
+            self.$apply()
+          } else {
+            wx.showToast({
+              title: '添加失败',
+              icon: 'none',
+              duration: 2000
+            })          }
+        },
+        fail: function (e) {
+          console.log(e)
+          wx.showToast({
+            title: '添加失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+    }
+  }
+</script>

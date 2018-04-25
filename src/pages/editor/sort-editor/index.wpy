@@ -1,0 +1,258 @@
+<style lang="less">
+  page {
+    height: 100%;
+  }
+
+  .back-view {
+    background-color: #EDF0F5;
+    height: 100%;
+    width: 100%;
+  }
+
+  .sort-title {
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 15px;
+    color: #666666;
+    font-weight: bold;
+  }
+
+  .sort-text {
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    font-size: 13px;
+    color: #666666;
+  }
+
+  .sort-view {
+    position: absolute;
+    height: 110px;
+    width: 110px;
+    background: white;
+  }
+
+  .sort-view-mask {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: rgba(0,0,0,0.50);
+    width: 100%;
+    height: 100%;
+  }
+
+  .sort-move-view {
+    position: fixed;
+    height: 110px;
+    width: 110px;
+    background: white;
+  }
+
+  .touch-view {
+    height: 100%;
+    width: 100%;
+    background: #EDF0F5;
+  }
+</style>
+
+<template>
+  <view class="back-view">
+    <view
+      class="touch-view"
+      bindlongpress="bindlongpress"
+      bindtouchmove="onChange"
+      bindtouchend="bindtouchend"
+    >
+      <repeat for="{{contents}}" key="index" index="index">
+        <view
+          data-index="{{index}}"
+          class="sort-view"
+          style="top: {{layouts[index].y}}px; left: {{layouts[index].x}}px;"
+        >
+
+          <view
+            wx:if="{{item.elementType === 0}}"
+            style="padding: 9px 9px 9px 9px;"
+          >
+            <text class="sort-title">{{item.title}}</text>
+            <text class="sort-text">{{item.content}}</text>
+          </view>
+
+          <view wx:else>
+            <image
+              src="{{item.imgs[0].imgUrl}}"
+              style="width: 110px; height: 100px;"
+            />
+          </view>
+
+          <view
+            hidden="{{currentIndex !== index}}"
+            class="sort-view-mask"
+          />
+        </view>
+      </repeat>
+    </view>
+
+    <view
+      wx:if="{{showFixedView}}"
+      class="sort-move-view"
+      style="top: {{currentLayout.y + 2}}px; left: {{currentLayout.x + 2}}px; "
+      animation="{{animationData}}"
+    >
+      <view
+        wx:if="{{contents[currentIndex].elementType === 0}}"
+        style="padding: 9px 9px 9px 9px;"
+      >
+        <text class="sort-title">{{contents[currentIndex].title}}</text>
+        <text class="sort-text">{{contents[currentIndex].content}}</text>
+      </view>
+
+      <view wx:else>
+        <image
+          src="{{contents[currentIndex].imgs[0].imgUrl}}"
+          style="width: 110px; height: 100px;"
+        />
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import utils from '../../../utils/utils'
+  import { getStore } from 'wepy-redux'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '发布旅行心得'
+    }
+
+    data = {
+      contents: [],
+      layouts: [],
+      showFixedView: false,
+      currentIndex: -1,
+      animation: wx.createAnimation({
+        duration: 0,
+        timingFunction: 'ease',
+      }),
+      currentLayout: {
+        x: -1,
+        y: -1,
+      },
+      lastLayout: {
+        x: 0,
+        y: 0,
+      }
+    }
+
+    computed = {
+    }
+
+    methods = {
+      bindlongpress(num) {
+        let event = num.changedTouches[0]
+        this.lastLayout = {
+          x: event.pageX,
+          y: event.pageY,
+        }
+
+        let currentIndex =  parseInt(event.pageY / 122) * 3 + parseInt(event.pageX / 122)
+        currentIndex = utils.getEffectiveIndex(currentIndex, this.contents.length)
+        this.currentLayout = {
+          x: this.getLayoutX(currentIndex),
+          y: this.getLayoutY(currentIndex),
+        }
+        this.currentIndex = currentIndex
+        this.showFixedView = true
+      },
+      onChange(num) {
+        // 非排序状态
+        if (this.showFixedView !== true) {
+          return
+        }
+
+        // 计算当前位置
+        let event = num.changedTouches[0]
+        let currentX = event.pageX
+        let currentY = event.pageY
+
+        this.currentLayout.x += (currentX - this.lastLayout.x)
+        this.currentLayout.y += (currentY - this.lastLayout.y)
+        this.animation.translate(this.currentLayout.x, this.currentLayout.y).step()
+        this.animationData = this.animation.export()
+
+        // 更新上次位置
+        this.lastLayout = {
+          x: event.pageX,
+          y: event.pageY,
+        }
+      },
+      bindtouchend(e) {
+        // 非排序状态
+        if (this.showFixedView !== true) {
+          return
+        }
+
+        this.showFixedView = false
+
+        // 获取拖动item索引
+        let dragIndex = this.currentIndex
+        this.currentIndex = -1
+
+        // 计算排序
+        if (this.pointInDisplayArea(this.currentLayout)) {
+          // 计算拖动停止时所在的位置
+          let currentIndex =  Math.round(this.currentLayout.y / 122) * 3 + Math.round(this.currentLayout.x / 122)
+          currentIndex = utils.getEffectiveIndex(currentIndex, this.contents.length)
+
+          // 获取拖动item
+          let dragItem = this.contents[dragIndex]
+
+          // 更新顺序
+          this.contents.splice(dragIndex, 1)
+          this.contents.splice(currentIndex, 0, dragItem)
+        }
+      }
+    }
+
+    onLoad(options) {
+      const store = getStore()
+      const state = store.getState()
+      this.contents = state.editor.contents
+
+      this.contents.forEach((item, index) => {
+        this.layouts.push({
+          x: this.getLayoutX(index),
+          y: this.getLayoutY(index),
+        })
+      })
+    }
+
+    onHide() {
+      this.contents.forEach((item, index) => {
+        item.elementId = index
+      })
+    }
+
+    getLayoutX(index) {
+      return (index % 3 + 1) * 12 + (index % 3) * 110
+    }
+
+    getLayoutY(index) {
+      return parseInt(index / 3 + 1) * 12 + parseInt(index / 3) * 110
+    }
+
+    pointInDisplayArea(point) {
+      return (point.x >= 0 && point.y >= 0 && point.x <= 122 * 3 && point.y <= this.$parent.globalData.screenHeight)
+    }
+  }
+</script>

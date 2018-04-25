@@ -1,0 +1,414 @@
+<style lang="less">
+  .input-view {
+    height: 36px;
+    margin: 10px 15px 10px 15px;
+    border-radius: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    background-color: #EDF0F5;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .association-line {
+    border-bottom: 0.5px solid rgba(0,0,0,0.10);
+    margin-left: 15px;
+  }
+
+  .association-item {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px;
+  }
+
+  .association-item-text {
+    font-size: 16px;
+    color: #333333;
+  }
+
+  .location-title-view {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    padding-bottom: 3px;
+    padding-left: 14px;
+    padding-right: 16px;
+  }
+
+  .location-title-item {
+    background-color: #FFFBF9;
+    border-radius: 100px;
+    border: 1px solid #FF7733;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 6.5px;
+    padding-bottom: 5.5px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 9px;
+    margin-top: 9px;
+  }
+
+  .location-item-text {
+    font-size: 14px;
+    color: #FF7733;
+  }
+
+  .local-title-view {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    padding-bottom: 3px;
+    padding-left: 14px;
+    padding-right: 16px;
+  }
+
+  .title-text {
+    font-size: 13px;
+    color: #A5A5A5;
+  }
+
+  .local-title-clear {
+    font-size: 13px;
+    color: #FF7733;
+  }
+
+  .local-content-view {
+    display: flex;
+    flex-direction: row;
+    padding-left: 5px;
+    flex-wrap: wrap;
+    padding-bottom: 17px;
+  }
+
+  .local-item {
+    background-color: #F2F4F7;
+    border-radius: 100px;
+    display: flex;
+    flex-direction: row;
+    padding-top: 6.5px;
+    padding-bottom: 5.5px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 9px;
+    margin-top: 9px;
+  }
+
+  .local-item-text {
+    font-size: 14px;
+    color: #333333;
+  }
+
+  .recommend-title-view {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    padding-bottom: 3px;
+    padding-left: 15px;
+  }
+
+  .recommend-content-view {
+    flex-wrap: wrap;
+    display: flex;
+    padding-left: 6px;
+  }
+</style>
+
+<template>
+  <view>
+    <view>
+      <view class="input-view">
+        <image
+          src="../../../images/tn-wx-search-search.png"
+          style="width: 14px; height: 14px; margin-right: 5px;"
+        />
+        <input
+          style="font-size: 14px; color: #333333; flex: 1;"
+          value="{{searchKeyword}}"
+          placeholder="目的地/关键词"
+          placeholder-style="color: #CCCCCC; font-size: 14px;"
+          bindinput="bindinput"
+          bindconfirm="bindconfirm"
+        />
+        <view wx:if="{{searchKeyword !== ''}}" @tap="clickedClearSearchKeyword">
+          <image
+            src="../../../images/tn-wx-search-clear.png"
+            style="width: 15px; height: 15px;"/>
+        </view>
+      </view>
+    </view>
+
+
+    <!--联想状态下-->
+    <view wx:if="{{isSearching}}">
+      <repeat for="{{searchResults}}" key="index" index="index">
+        <view class="association-item" data-info="{{item.poiName}}" @tap="clickedCurrentPoi">
+          <text class="association-item-text">{{item.poiName}}</text>
+        </view>
+        <view class="association-line"/>
+      </repeat>
+    </view>
+
+    <!--默认状态下 最近 热门推荐-->
+    <view wx:else>
+
+      <view wx:if="{{locationName !== '' && locationName !== undefined}}">
+        <view class="location-title-view">
+          <tex class="title-text">当前定位城市</tex>
+        </view>
+        <view class="local-content-view">
+          <view
+            class="location-title-item"
+            data-type="location"
+            @tap="clickedCurrentPoi"
+          >
+            <image
+              src="../../../images/tn-wx-destination-location.png"
+              style="width: 12px; height: 13px; margin-right: 5px;"
+            />
+            <text class="location-item-text">{{locationName}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{historyPOIList.length > 0}}">
+        <view class="local-title-view">
+          <text class="title-text">{{historyTitle}}</text>
+          <view @tap="clickedClearLocalButton">
+            <text class="local-title-clear">清除</text>
+          </view>
+        </view>
+        <view class="local-content-view">
+          <repeat for="{{historyPOIList}}" key="index" index="index">
+            <view
+              class="local-item"
+              data-type="history"
+              data-index="{{index}}"
+              @tap="clickedCurrentPoi"
+            >
+              <text class="local-item-text">{{item.poiName}}</text>
+            </view>
+          </repeat>
+        </view>
+      </view>
+
+      <view wx:if="{{recommendList.length > 0}}">
+        <view class="recommend-title-view">
+          <tex class="title-text">推荐目的地</tex>
+        </view>
+        <view class="recommend-content-view">
+          <repeat for="{{recommendList}}" key="index" index="index">
+            <view
+              class="local-item"
+              data-type="recommend"
+              data-index="{{index}}"
+              @tap="clickedCurrentPoi"
+            >
+              <text class="local-item-text">{{item.poiName}}</text>
+            </view>
+          </repeat>
+        </view>
+      </view>
+
+    </view>
+
+  </view>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  import utils from '../../../utils/utils'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: '添加目的地'
+    }
+
+    data = {
+      fromSquare: true,
+      locationName: '',
+      isSearching: false,
+      searchKeyword: '',
+      historyTitle: '最近搜索',
+      searchResults: [
+        {
+          poiName: '泰国'
+        },
+        {
+          poiName: '泰国画骨化石'
+        },
+        {
+          poiName: '一日游泰国'
+        },
+        {
+          poiName: '一日游泰国'
+        }
+
+      ],
+      historyPOIList: [],
+      recommendList: [
+        {
+          poiName: '泰国'
+        },
+        {
+          poiName: '泰国画骨化石'
+        },
+        {
+          poiName: '一日游泰国'
+        },
+        {
+          poiName: '一日游泰国'
+        }
+
+      ]
+    }
+
+    methods = {
+      bindinput(value, cursor) {
+        this.searchKeyword = value.detail.value
+        if (this.searchKeyword !== '') {
+          this.isSearching = true
+        } else {
+          this.isSearching = false
+        }
+      },
+      bindconfirm(value) {
+
+      },
+      clickedClearSearchKeyword() {
+        this.isSearching = false
+        this.searchKeyword = ''
+      },
+      clickedClearLocalButton() {
+        this.historyPOIList = []
+        this.clearHistory()
+      },
+      clickedCurrentPoi(item, event) {
+        // 获取点击poi信息
+        let selectPoiInfo = this.getSelectInfo(item.currentTarget.dataset.type, item.currentTarget.dataset.index)
+
+        // 为空，返回
+        if (!selectPoiInfo) {
+          return
+        }
+
+        // 添加到历史搜索
+        this.addHistorySelect(selectPoiInfo)
+
+        // 通过本地缓存向上一个页面返回参数
+        wx.setStorage({
+          key: utils.cityStorageKey,
+          data: selectPoiInfo,
+          success: () => {
+            this.$back()
+          }
+        })
+      }
+    }
+
+    onLoad(options) {
+      if (options) {
+        this.fromSquare = options.fromSquare
+      }
+      if (this.fromSquare === true || this.fromSquare === 'true') {
+        this.fromSquare = true
+        wx.setNavigationBarTitle({
+          title: '切换目的地'
+        })
+        this.historyTitle = '最近浏览'
+      } else {
+        this.fromSquare = false
+        wx.setNavigationBarTitle({
+          title: '添加目的地'
+        })
+        this.historyTitle = '最近搜索'
+      }
+
+      let self = this
+      wx.getLocation({
+        type: 'wgs84',
+        success: function(res) {
+          var latitude = res.latitude
+          var longitude = res.longitude
+
+
+          self.locationName = '南京'
+          self.$apply()
+        }
+      })
+
+      // 获取历史搜索poi
+      wx.getStorage({
+        key: this.fromSquare ? utils.squareSearchPOICache : utils.spaceSearchPOICache,
+        success: function(res) {
+          self.historyPOIList = res.data
+          self.$apply()
+        }
+      })
+    }
+
+    getSelectInfo(sourceType, index) {
+      let currentTapPOI
+      switch (sourceType) {
+        case 'location':
+          currentTapPOI = {}
+          break
+        case 'history':
+          currentTapPOI = this.historyPOIList[index]
+          this.historyPOIList.splice(index, 1)
+          break
+        case 'recommend':
+          currentTapPOI = this.recommendList[index]
+          break
+        case 'searchResult':
+          currentTapPOI = this.searchResults[index]
+          break
+        default:
+          break
+      }
+
+      return currentTapPOI
+    }
+
+    // 添加选择历史
+    addHistorySelect(currentTapPOI) {
+
+      this.historyPOIList.unshift(currentTapPOI)
+
+      this.historyPOIList = this.historyPOIList.slice(0, 5)
+
+      wx.setStorage({
+        key: this.fromSquare ? utils.squareSearchPOICache : utils.spaceSearchPOICache,
+        data: this.historyPOIList,
+        success: () => {
+
+        }
+      })
+    }
+
+    clearHistory() {
+      wx.removeStorage({
+        key: this.fromSquare ? utils.squareSearchPOICache : utils.spaceSearchPOICache,
+        data: this.historyPOIList,
+        success: () => {
+          wx.showToast({
+            title: '清除成功',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+    }
+  }
+</script>

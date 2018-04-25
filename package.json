@@ -14,7 +14,7 @@
     "module-a": false,
     "./src/components/list": "./src/components/wepy-list.wpy"
   },
-  "author": "郭兆伟 guozhaowei (99999) <guozhaowei@tuniu.com>",
+  "author": "胡佳能 hujianeng (99999) <hu837513327@163.com>",
   "license": "MIT",
   "dependencies": {
     "promise-polyfill": "^7.1.1",

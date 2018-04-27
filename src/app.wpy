@@ -2,10 +2,10 @@
 .container {
   height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   box-sizing: border-box;
+  justify-content: space-between;
 }
 </style>
 
@@ -13,11 +13,9 @@
 import wepy from 'wepy'
 import 'wepy-async-function'
 
-import { setStore, getStore } from 'wepy-redux'
 import configStore from './store'
+import { setStore, getStore } from 'wepy-redux'
 import {
-  getSpaceList,
-  getUsersCount,
   obtainUserInfo
 } from './store/actions'
 
@@ -29,18 +27,18 @@ export default class extends wepy.app {
     pages: [
       // 空间
       'pages/space/space-home/index',
+      'pages/space/space-list/index',
+      'pages/space/change-tab/index',
       'pages/space/create-space/index',
       'pages/space/dynamic-list/index',
-      'pages/space/space-list/index',
       'pages/space/space-detail/index',
       'pages/space/add-destination/index',
-      'pages/space/change-tab/index',
 
       // 发布
-      'pages/editor/content-editor/index',
-      'pages/editor/title-editor/index',
-      'pages/editor/paragraph-editor/index',
       'pages/editor/sort-editor/index',
+      'pages/editor/title-editor/index',
+      'pages/editor/content-editor/index',
+      'pages/editor/paragraph-editor/index',
 
       'pages/square/square-home/index',
       'pages/square/square-quote/index',
@@ -63,51 +61,45 @@ export default class extends wepy.app {
     ],
     window: {
       backgroundTextStyle: 'light',
-      navigationBarBackgroundColor: 'white',
       navigationBarTitleText: '空间',
-      navigationBarTextStyle: 'black'
+      navigationBarTextStyle: 'black',
+      navigationBarBackgroundColor: 'white'
     },
     tabBar: {
       color: '#92979F',
+      position: 'bottom',
       selectedColor: '#051B28',
       backgroundColor: '#ffffff',
       borderStyle: 'rgba(0,0,0,0.10)',
-      position: 'bottom',
       list: [
         {
-          pagePath: 'pages/space/space-home/index',
           text: '空间',
           iconPath: 'images/tn-wx-tab-space.png',
+          pagePath: 'pages/space/space-home/index',
           selectedIconPath: 'images/tn-wx-tab-space-highlight.png'
         },
         {
-          pagePath: 'pages/square/square-home/index',
           text: '广场',
           iconPath: 'images/tn-wx-tab-square.png',
+          pagePath: 'pages/square/square-home/index',
           selectedIconPath: 'images/tn-wx-tab-square-highlight.png'
         },
         {
-          pagePath: 'pages/mine/mine-home/index',
           text: '我的',
           iconPath: 'images/tn-wx-tab-mine.png',
+          pagePath: 'pages/mine/mine-home/index',
           selectedIconPath: 'images/tn-wx-tab-mine-highlight.png'
         }
       ]
     },
     networkTimeout: {
       request: 10000,
-      connectSocket: 10000,
       uploadFile: 100000,
-      downloadFile: 100000
+      downloadFile: 100000,
+      connectSocket: 10000
     },
 
-    debug: true,
-
-    getPhoneNumber: function(e) {
-      console.log(e.detail.errMsg)
-      console.log(e.detail.iv)
-      console.log(e.detail.encrypedData)
-    }
+    debug: true
   }
 
   globalData = {
@@ -123,26 +115,6 @@ export default class extends wepy.app {
 
   onLaunch() {
     getStore().dispatch(obtainUserInfo.apply())
-  }
-
-  sleep (s) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('promise resolved')
-      }, s * 1000)
-    })
-  }
-
-  onShow() {
-  }
-
-  onHide() {
-
-  }
-
-  async testAsync () {
-    const data = await this.sleep(3)
-    console.log(data)
   }
 }
 </script>

@@ -1,7 +1,0 @@
-@import "./../../../components/release-item.wxss";
-page {
-  background-color: #f6f6f6;
-}
-.release-list {
-  margin-top: 9px;
-}

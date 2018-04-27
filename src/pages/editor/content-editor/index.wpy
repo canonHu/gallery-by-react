@@ -56,7 +56,7 @@
   .paragraph-list {
     padding-left: 15px;
     padding-right: 15px;
-    padding-top: 12px;
+    padding-top: 3px;
   }
 
   .editor-button-style {
@@ -354,7 +354,7 @@
             <contentimagesview
               :currentIndex="index"
               :imgs="item.imgs"
-              :sepSize="getSpaceSepSize"
+              :imageSize="getImageWidth"
               @deleteImg.user="clickedDeleteContentImgButton"
             />
             <view class="content-delete-view">
@@ -385,16 +385,12 @@
         <view class="line-view"/>
 
         <!--目的地-->
-        <view wx:if="{{sourceType === 'square'}}" class="section-view">
+        <view wx:if="{{spaceId === 0}}" class="section-view">
           <text style="font-size: 15px; color: #333333;">目的地<text style="font-size: 13px; color: #999999;">（请添加对应目的地）</text></text>
           <view class="editor-poi-list">
             <repeat for="{{selectPois}}" key="index" index="index">
               <view class="editor-poi-button">
-                <image
-                  src="../../../images/tn-wx-desination-item-location.png"
-                  style="width: 11px; height: 12px; margin-right: 7px;"
-                />
-                <text class="editor-poi-text">{{item.poiName}}</text>
+                <text class="editor-poi-text">{{item.name}}</text>
                 <view @tap="clickedDeletePoiButton" data-info="{{item}}" class="editor-delete-button">
                   <image
                     src="../../../images/tn-wx-desination-item-delete.png"
@@ -413,13 +409,11 @@
           </view>
         </view>
 
-
-
         <!--板块-->
         <view class="section-view">
           <text style="font-size: 15px; color: #333333;">版块<text style="font-size: 13px; color: #999999;">（请选择对应版块，最多选3个）</text></text>
           <view class="tag-list">
-            <repeat for="{{tabs}}" key="index" index="index">
+            <repeat for="{{tags}}" key="index" index="index">
               <view
                 class="{{item.isSelect ? 'tag-select-item' : 'tag-noselect-item'}}"
                 data-info="{{item}}"
@@ -433,7 +427,7 @@
         </view>
 
         <!--同步-->
-        <view style="background-color: #EDF0F5; padding-top: 14px; padding-bottom: 16px; padding-left: 15px; padding-right: 15px; display: flex; flex-direction: row; align-items: center;">
+        <view wx:if="{{spaceId > 0}}" style="background-color: #EDF0F5; padding-top: 14px; padding-bottom: 16px; padding-left: 15px; padding-right: 15px; display: flex; flex-direction: row; align-items: center;">
           <image
             @tap="clickedSyncSquare"
             src="{{selectedSync ? selectedIcon : noselectIcon}}"
@@ -487,10 +481,11 @@
 
 <script>
   import wepy from 'wepy'
-  import CompleteButton from '../../../components/complete-button'
-  import ContentImagesView from '../../../components/content-images-view'
+  import CompleteButton from '../../../components/editor/complete-button'
+  import ContentImagesView from '../../../components/editor/content-images-view'
   import { getStore } from 'wepy-redux'
   import { CHANGE_PARAGRAGH_DATA, CHANGE_CONTENT_POI_LIST, CHANGE_CONTENT_TAG_LIST, EDITOR_CONTENT_CLEAR } from '../../../store/types/editor'
+  import { publishArticle, uploadImage, getTagList } from '../../../store/actions'
 
   import test from '../../../utils/test'
   import utils from '../../../utils/utils'
@@ -508,19 +503,21 @@
     }
 
     data = {
-      sourceType: '',
+      spaceId: 0,
       title: '',
       noData: false,
       addButtonOffsetY: -1,
       currentAddIndex: -1,
-      tabs: [],
+      tags: [],
       contents: [],
+
       selectTags: [],
+
+      selectPois: [],
+
       selectedSync: false,
       selectedIcon: '../../../images/tn-wx-editor-select-true.png',
       noselectIcon: '../../../images/tn-wx-editor-select-false.png',
-
-      selectPois: [],
 
       store: getStore()
     }
@@ -535,21 +532,26 @@
       checkEmptyContentList() {
         return !(this.contents.length > 0)
       },
-      getSpaceSepSize() {
-        return (this.$parent.globalData.screenWidth - 30 - 100 * 3) / 2
+      getImageWidth() {
+        return (this.$parent.globalData.screenWidth - 15 * 4) / 3
       }
     }
 
     methods = {
       clickedReleaseButton() {
         this.addButtonOffsetY = -1
-        if (this.selectTags.length <= 0) {
-          wx.showToast({
-            title: '板块不能为空～',
-            icon: 'none',
-            duration: 2000
-          })
-          return
+
+        wx.showLoading({
+          title: '发布中...',
+        })
+        if (this.checkAvailable()) {
+          this.store.dispatch(publishArticle.apply(this.store, [this.generatePublishData()]))
+            .then(() => {
+              wx.hideLoading()
+            })
+            .catch(() => {
+              wx.hideLoading()
+            })
         }
       },
       clickedTitleEditorButton() {
@@ -581,24 +583,40 @@
             // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
             let images = res.tempFilePaths
 
-            // 上传图片
+            let successCount = 0
+            let results = []
+            images.forEach((item, index) => {
+              // 上传图片
+              self.store.dispatch(uploadImage.apply(self.store, [item, self.store.getState().request.openId]))
+                .then((success) => {
+                  successCount += 1
+                  results[success.payload.picName] = success.payload.picUrl
 
-            // 添加到数组
-            let contentInfo = {
-              elementType: 1,
-              imgs: images,
-              elementId: parseInt(self.currentAddIndex) === -1 ? self.contents.length : self.currentAddIndex
-            }
+                  if (successCount === images.length) {
+                    for (let i = 0; i < images.length; i++) {
+                      let paths = images[i].split("//")[1].split("/");
+                      images[i] = results[paths[paths.length-1]]
+                    }
 
-            self.store.dispatch({ type: CHANGE_PARAGRAGH_DATA, element: contentInfo })
+                    // 添加到数组
+                    let contentInfo = {
+                      elementType: 1,
+                      imgs: images,
+                      elementId: parseInt(self.currentAddIndex) === -1 ? self.contents.length : self.currentAddIndex
+                    }
 
-            self.$apply()
+                    self.store.dispatch({ type: CHANGE_PARAGRAGH_DATA, element: contentInfo })
+
+                    self.$apply()
+                  }
+                })
+            })
           }
         })
       },
       clickedCurrentTag(value, evt) {
-        let info = utils.getSelectTagsInfo(this.tabs, this.selectTags, parseInt(value.currentTarget.id), 3)
-        this.tabs = info.tabs
+        let info = utils.getSelectTagsInfo(this.tags, this.selectTags, parseInt(value.currentTarget.id), 3)
+        this.tags = info.tabs
         this.selectTags = info.selectTags
         this.store.dispatch({type: CHANGE_CONTENT_TAG_LIST, tagList: this.selectTags})
       },
@@ -621,9 +639,9 @@
           }
         })
       },
-      clickedDeletePoiButton() {
+      clickedDeletePoiButton(value) {
         let clickedItem = value.currentTarget.dataset.info
-        this.selectPois = utils.deleteCityFromArray(this.selectPois, clickedItem, (old, news) => old.poiName === news.poiName)
+        this.selectPois = utils.deleteCityFromArray(this.selectPois, clickedItem, (old, news) => old.name === news.name)
         this.store.dispatch({type: CHANGE_CONTENT_POI_LIST, poiList: this.selectPois})
       },
       clickedAddPoiButton() {
@@ -658,11 +676,88 @@
       }
     }
 
+    checkAvailable() {
+      let hasText = false
+
+      // 纠正顺序
+      for (let i = 0; i < this.contents.length; i++) {
+        let item = this.contents[i]
+        item.elementId = i
+        if (item.elementType === 0) {
+          hasText = true
+        }
+      }
+
+      // 判空
+      if (hasText !== true) {
+        wx.showToast({
+          title: '内容不能为空～',
+          icon: 'none',
+          duration: 2000
+        })
+        return false
+      }
+
+      if (this.spaceId === 0 && this.selectPois.length <= 0) {
+        wx.showToast({
+          title: '目的地不能为空～',
+          icon: 'none',
+          duration: 2000
+        })
+        return false
+      }
+
+      if (this.selectTags.length <= 0) {
+        wx.showToast({
+          title: '板块不能为空～',
+          icon: 'none',
+          duration: 2000
+        })
+        return false
+      }
+
+      return true
+    }
+
+    generatePublishData() {
+      let poiIds = []
+      this.selectPois.forEach((item, index) => {
+        poiIds.push(parseInt(item.id))
+      })
+
+      let tagIds = []
+      this.selectTags.forEach((item, index) => {
+        tagIds.push(parseInt(item.id))
+      })
+
+      let articleInfo = {
+        userId: this.store.getState().request.userInfo.userId,
+        contentInfo: {
+          title: this.title,
+          elements: this.contents
+        },
+        tagIds: tagIds,
+        publicFlag: this.selectedSync,
+      }
+
+      if (this.spaceId === 0) {
+        articleInfo.poiIds = poiIds
+      } else {
+        articleInfo.spaceId = this.spaceId
+      }
+
+      return articleInfo
+    }
+
     onLoad(options) {
       this.title = options.title
-      this.tabs = test.testTabData
-      this.sourceType = options.type
-      this.selectedSync = (this.sourceType === 'space')
+
+      this.spaceId = options.spaceId !== undefined ? parseInt(options.spaceId) : 0
+      this.selectedSync = (this.spaceId > 0)
+      this.store.dispatch(getTagList.apply()).then((data) => {
+        this.tags = []
+        this.$apply()
+      })
     }
 
     onShow() {
@@ -676,7 +771,7 @@
       wx.getStorage({
         key: utils.cityStorageKey,
         success: function(res) {
-          let callback = (old, news) => old.poiName === news.poiName
+          let callback = (old, news) => old.name === news.name
           self.selectPois = utils.reContructSelectCitys(self.selectPois, res.data, callback)
           self.store.dispatch({type: CHANGE_CONTENT_POI_LIST, poiList: this.selectPois})
 

@@ -256,17 +256,9 @@
       </view>
 
       <scroll-view scroll-x="true" style="width: 100%">
-        <view wx:if="{{spaceList.length === 1}}" class="center-list">
-          <spaceitem
-            :index="0"
-            :item="getFirstSpaceInfo"
-            :itemWidth="getImageWidth"
-            @tapEvent.user="clickedSimpleSpace"
-          />
-        </view>
-        <view wx:if="{{spaceList.length > 1}}" class="list">
+        <view class="{{ list }}">
           <repeat for="{{spaceList}}" key="index" index="index">
-            <view style="margin-left: 20px;">
+            <view style="margin-left: {{spaceList.length > 1 ? 20 : 0}}px;">
               <spaceitem
                 :index="index"
                 :item="item"
@@ -293,12 +285,17 @@
 
 <script>
   import wepy from 'wepy'
-  import SpaceItem from '../../../components/space-item'
-  import test from '../../../utils/test'
+  import SpaceItem from '../../../components/space/space-item'
 
-  import { getStore } from 'wepy-redux'
-  import { obtainUserInfo, getUsersCount, getSpaceList } from '../../../store/actions'
-  import { SPACE_HOME_USERS } from '../../../store/types/space'
+  import { getStore, connect } from 'wepy-redux'
+  import { getUsersCount, getSpaceList } from '../../../store/actions'
+
+  @connect({
+    userId (state) {
+      return state.request.userInfo.userId
+    }
+  }, {
+  })
 
   export default class Index extends wepy.page {
     config = {
@@ -312,64 +309,34 @@
     }
 
     data = {
-      store: getStore(),
-      hasSpace: true,
       person: 0,
-      defaultUserImage: '../../../images/test.png',
+      list: 'list',
+      spaceList: [],
+      hasSpace: true,
       dynamicDatas: [],
-      spaceList: []
+      store: getStore(),
+      defaultUserImage: '../../../images/test.png'
     }
 
     computed = {
       getImageWidth() {
         return this.$parent.globalData.spaceItemWidth
-      },
-      getFirstSpaceInfo() {
-        return this.spaceList[0]
+      }
+    }
+
+    watch = {
+      userId (newValue) {
+        this.getSpaceHomeInfo(newValue)
       }
     }
 
     onShow() {
-      let self = this
-      wx.getSetting({
-        success(res) {
-          if (!res.authSetting['scope.userLocation']) {
-            wx.authorize({
-              scope: 'scope.userLocation',
-              success() {
-
-              },
-              fail() {
-
-              }
-            })
-          }
-
-          if (!res.authSetting['scope.userInfo']) {
-            wx.authorize({
-              scope: 'scope.userInfo',
-              success() {
-                self.store.dispatch(obtainUserInfo.apply()).then((e) => {
-                  self.getSpaceHomeInfo()
-                })
-              },
-              fail() {
-                wx.reLaunch({url: '../../../pages/error/authority-fail/index'})
-              }
-            })
-          } else {
-            self.store.dispatch(obtainUserInfo.apply()).then((e) => {
-              self.getSpaceHomeInfo()
-            })
-          }
-        }
-      })
+      if (this.userId) {
+        this.getSpaceHomeInfo(this.userId)
+      }
     }
 
-    getSpaceHomeInfo() {
-      const state = this.store.getState()
-      let userId = state.request.userInfo.userId
-
+    getSpaceHomeInfo(userId) {
       let self = this
 
       // 请求使用人数
@@ -381,6 +348,7 @@
       // 请求空间列表
       this.store.dispatch(getSpaceList.apply(this.store, [userId])).then(() => {
         self.spaceList = self.store.getState().space.spaceList
+        self.list = (self.spaceList.length > 1 ? 'list' : 'center-list')
         self.$apply()
       })
     }
@@ -395,7 +363,7 @@
       },
 
       clickedSimpleSpace(num, evt) {
-        this.$navigate('../space-detail/index', {})
+        this.$navigate('../space-detail/index', {spaceId: num.item.spaceId})
       },
 
       clickedSpaceListMoreButton(num, evt) {

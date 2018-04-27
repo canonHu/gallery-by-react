@@ -129,6 +129,27 @@
     color: #666666;
     margin-top: 6px;
   }
+
+  .list-bottom {
+    width: 100%;
+    height: 57px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .list-bottom .line {
+    width: 31px;
+    height: 2px;
+    background-color: #DDDDDD;
+  }
+
+  .list-bottom .text {
+    font-size: 13px;
+    margin: 0 5.5px;
+    color: #DDDDDD;
+  }
 </style>
 
 <template>
@@ -170,29 +191,37 @@
       </view>
     </view>
     <view style="position: relative;">
-      <view wx:if="{{list.length > 0}}" class="sort-view">
-        <view>
-          <text class="count-text">共<text>{{list.length}}</text>条信息</text>
+      <view wx:if="{{list.length > 0}}">
+        <view class="sort-view">
+          <view>
+            <text class="count-text">共<text>{{list.length}}</text>条信息</text>
+          </view>
+          <view @tap="clickedSortButton" class="sort-button">
+            <text style="font-size: 14px; color: #999999;">{{sortTypes[currentSort]}}</text>
+            <image
+              src="../../../images/tn-wx-space-detail-sort.png"
+              style="margin-left: 5px;width: 15px; height: 13px;"
+            />
+          </view>
         </view>
-        <view @tap="clickedSortButton" class="sort-button">
-          <text style="font-size: 14px; color: #999999;">{{sortTypes[currentSort]}}</text>
-          <image
-            src="../../../images/tn-wx-space-detail-sort.png"
-            style="margin-left: 5px;width: 15px; height: 13px;"
-          />
+        <scroll-view wx:if="{{list.length > 0}}">
+          <repeat for="{{list}}" key="index" index="index">
+            <releaseitem :cancelFlag="cancelFlag"
+                         :items="item"
+                         :index="index"
+                         :fromSquare="fromSquare"
+                         @tapEvent.user="clickedListItem"
+                         @tapMoreEvent.user="clickedListItemMoreButton"
+            />
+          </repeat>
+        </scroll-view>
+        <!--列表底部提示-->
+        <view wx:if="{{isFinish}}" class="list-bottom">
+          <view class="line"/>
+          <text class="text">到底了</text>
+          <view class="line"/>
         </view>
       </view>
-      <scroll-view wx:if="{{list.length > 0}}">
-        <repeat for="{{list}}" key="index" index="index">
-          <releaseitem :cancelFlag="cancelFlag"
-                       :items="item"
-                       :index="index"
-                       :fromSquare="fromSquare"
-                       @tapEvent.user="clickedListItem"
-                       @tapMoreEvent.user="clickedListItemMoreButton"
-          />
-        </repeat>
-      </scroll-view>
 
       <!--无内容-->
       <view wx:else class="space-detail-empty-view">
@@ -261,6 +290,7 @@
   import wepy from 'wepy'
   import TabListView from '../../../components/tab-list-view'
   import TabList from '../../../components/tab-list'
+  import utils from '../../../utils/utils'
   import test from '../../../utils/test'
   import AlertList from '../../../components/alert-list'
   import ReleaseItem from '../../../components/release-item'
@@ -297,6 +327,7 @@
 
       showToTop: false,
       screenHeight: 0,
+      isFinish: true,
 
       fromSquare: true,
 
@@ -347,7 +378,7 @@
         })
       },
       clickedPostButton() {
-        this.$navigate('../../pop/content-post/index', {type: 'square'})
+        this.$navigate('../../pop/content-post/index', {})
       },
       clickCurrentTab(num, evt) {
         this.selectIndex = num.index
@@ -423,6 +454,7 @@
     }
 
     onLoad() {
+      let self = this
       if (responseRelease.success) {
         this.list = responseRelease.data.list
         this.list.forEach((item, i) => {
@@ -436,8 +468,42 @@
         this.datachange()
       }
       this.screenHeight = wx.getSystemInfoSync().windowHeight
+
+      // 获取历史搜索poi
+      wx.getStorage({
+        key: utils.squareSearchPOICache,
+        success: function(res) {
+          if (utils.haveValue(res.data)) {
+            self.cityName = res.data[0].name
+            self.cityCode = res.data[0].id
+            self.$apply()
+          }
+        }
+      })
+
       this.tabs = test.testTabData
       this.$apply()
+    }
+
+    onShow() {
+      let self = this
+      wx.getStorage({
+        key: utils.cityStorageKey,
+        success: function(res) {
+          if (res.data) {
+            self.cityName = res.data.name
+            self.cityCode = res.data.id
+            self.$apply()
+          }
+        },
+        complete: function () {
+          wx.removeStorage({
+            key: utils.cityStorageKey,
+            success: function(res) {
+            }
+          })
+        }
+      })
     }
 
     onPullDownRefresh() {
@@ -466,10 +532,9 @@
     }
 
     onShareAppMessage(options) {
-      let self = this
       let shareObj = {
         title: '旅行最in攻略、最hot推荐、最实用指南',
-        path: '/pages/space/space-list/index',
+        path: '/pages/space/space-home/index',
         success: function (res) {
           if (res.errMsg === 'shareAppMessage:ok') {
           }
@@ -486,7 +551,7 @@
 
         }
       }
-      if(options.from === 'button') {
+      if (options.from === 'button') {
       }
       return shareObj
     }

@@ -139,8 +139,7 @@
     }
 
     data = {
-      type: '',
-      spacePois: [],
+      spaceId: 0,
       title: '',
       maxWordCount: 50,
       isEditor: false,
@@ -159,8 +158,7 @@
     }
 
     onLoad(options) {
-      this.spacePois = options.spacePois
-      this.type = options.type
+      this.spaceId = options.spaceId !== undefined ? parseInt(options.spaceId) : 0
       this.isEditor = (options.isEditor === 'true')
       this.completeText = this.isEditor ? '完成' : '下一步'
       this.title = ''

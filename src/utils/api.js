@@ -1,4 +1,5 @@
-export const request = (resolve, reject, payload, url, successFn) => {
+export const request = (resolve, reject, payload, url, successFn, failFn) => {
+
 	wx.request({
 		url: url,
 		method: 'POST',
@@ -8,8 +9,13 @@ export const request = (resolve, reject, payload, url, successFn) => {
 		},
 		success: function (res) {
 			if (res.data.success) {
-				successFn(resolve, res, payload.nickname)
-			}
-		}
+				successFn(resolve, res.data)
+			} else {
+        failFn && failFn(reject, err)
+      }
+		},
+    fail: function (err) {
+      failFn && failFn(reject, err)
+    }
 	})
 }

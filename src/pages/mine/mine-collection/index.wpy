@@ -38,8 +38,8 @@
       <repeat for="{{ arr }}" key="index" item="item" index="index">
         <releaseitem
           :cancelFlag="cancelFlag"
-          :items="item"
-          :index="index"
+          :items.sync="item"
+          :index.sync="index"
           @tapEvent.user="changeedit"
         ></releaseitem>
       </repeat>

@@ -1,0 +1,55 @@
+<style type="less">
+  .images-view {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -15px;
+  }
+
+  .image-view {
+    position: relative;
+    margin-left: 15px;
+  }
+</style>
+
+<template>
+  <view class="images-view">
+    <repeat for="{{imgs}}" key="index" index="index">
+      <view class="image-view" style="width: {{imageSize}}px;height: {{imageSize}}px;margin-top: 12px;">
+        <image
+          src="{{item}}"
+          mode="aspectFill"
+          style="width: {{imageSize}}px; height: {{imageSize}}px;"/>
+        <image
+          data-idnex="{{index}}"
+          @tap="clickedDeleteImgButton"
+          src="../../images/tn-wx-editor-image-delete.png"
+          style="position: absolute; width: 14px; height: 14px; top: 0px; right: 0px;"
+        />
+      </view>
+    </repeat>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class ContentImagesView extends wepy.component {
+    props = {
+      imageSize: Number,
+      currentIndex: Number,
+      imgs: Object
+    }
+
+    data = {}
+
+    computed = {}
+
+    methods = {
+      clickedDeleteImgButton(num, evt) {
+        this.$emit('deleteImg', {currentIndex: this.currentIndex, imgIndex: num.currentTarget.dataset.index})
+      }
+    }
+
+    onLoad() {}
+  }
+</script>

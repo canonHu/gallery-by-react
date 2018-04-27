@@ -124,6 +124,28 @@
     font-size: 14px;
     color: #777777;
   }
+
+
+  .list-bottom {
+    width: 100%;
+    height: 57px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .list-bottom .line {
+    width: 31px;
+    height: 2px;
+    background-color: #DDDDDD;
+  }
+
+  .list-bottom .text {
+    font-size: 13px;
+    margin: 0 5.5px;
+    color: #DDDDDD;
+  }
 </style>
 
 <template>
@@ -177,7 +199,7 @@
           />
         </view>
       </view>
-      <scroll-view style="margin-bottom: 50px">
+      <scroll-view>
         <repeat for="{{list}}" key="index" index="index">
           <releaseitem :cancelFlag="cancelFlag"
                        :items="item"
@@ -187,6 +209,12 @@
           />
         </repeat>
       </scroll-view>
+      <!--列表底部提示-->
+      <view wx:if="{{isFinish}}" class="list-bottom">
+        <view class="line"/>
+        <text class="text">到底了</text>
+        <view class="line"/>
+      </view>
 
       <!--蒙层框-->
       <view
@@ -244,6 +272,7 @@
   import wepy from 'wepy'
   import TabListView from '../../../components/tab-list-view'
   import TabList from '../../../components/tab-list'
+  import utils from '../../../utils/utils'
   import test from '../../../utils/test'
   import AlertList from '../../../components/alert-list'
   import ReleaseItem from '../../../components/release-item'
@@ -277,6 +306,7 @@
 
       showToTop: false,
       screenHeight: 0,
+      isFinish: true,
 
       fromSquare: false,
       cancelFlag: true,
@@ -333,10 +363,10 @@
         this.showTabview = !this.showTabview
       },
       jumpPoiSelect() {
-        this.$navigate('../../space/add-destination/index?fromSquare=' + this.fromSquare, {})
+        this.$navigate('../../space/add-destination/index?fromSquare=true', {})
       },
       jumpContentSelect() {
-        this.$navigate('../../search/content-search/index?fromSquare=' + this.fromSquare, {})
+        this.$navigate('../../search/content-search/index?fromSquare=true', {})
       },
       clickedSortButton(num, evt) {
         this.currentAlertSource = this.sortTypes
@@ -385,6 +415,7 @@
     }
 
     onLoad() {
+      let self = this
       if (responseRelease.success) {
         this.list = responseRelease.data.list
         this.list.forEach((item, i) => {
@@ -398,8 +429,42 @@
         this.datachange()
       }
       this.screenHeight = wx.getSystemInfoSync().windowHeight
+
+      // 获取历史搜索poi
+      wx.getStorage({
+        key: utils.squareSearchPOICache,
+        success: function(res) {
+          if (utils.haveValue(res.data)) {
+            self.cityName = res.data[0].name
+            self.cityCode = res.data[0].id
+            self.$apply()
+          }
+        }
+      })
+
       this.tabs = test.testTabData
       this.$apply()
+    }
+
+    onShow() {
+      let self = this
+      wx.getStorage({
+        key: utils.cityStorageKey,
+        success: function(res) {
+          if (res.data) {
+            self.cityName = res.data.name
+            self.cityCode = res.data.id
+            self.$apply()
+          }
+        },
+        complete: function () {
+          wx.removeStorage({
+            key: utils.cityStorageKey,
+            success: function(res) {
+            }
+          })
+        }
+      })
     }
 
     onPullDownRefresh() {
@@ -448,12 +513,14 @@
     clickedCompleteButton() {
       let self = this
       var pages = getCurrentPages()
-      var beforePage = pages[pages.length - 2] // 前一个页面
-      this.$back({
-        success: function() {
-          beforePage.quoteSpace(self.selectedList)
-        }
-      })
+      if (utils.haveValue(pages)) {
+        var beforePage = pages[pages.length - 2] // 前一个页面
+        this.$back({
+          success: function() {
+            beforePage.quoteSpace(self.selectedList)
+          }
+        })
+      }
     }
 
     changeTab(tabName) {

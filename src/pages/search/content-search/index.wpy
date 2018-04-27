@@ -176,13 +176,13 @@
   import utils from '../../../utils/utils'
   import test from '../../../utils/test'
   import SectionView from '../../../components/section-view'
-  import SpaceDetailListItem from '../../../components/space-detail-list-item'
+  import SpaceDetailListItem from '../../../components/space/space-detail-list-item'
 
   export default class Index extends wepy.page {
     config = {
       navigationBarBackgroundColor: '#ffffff',
       navigationBarTextStyle: 'black',
-      navigationBarTitleText: '广场搜索'
+      navigationBarTitleText: ''
     }
 
     components = {

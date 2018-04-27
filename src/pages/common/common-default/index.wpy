@@ -1,0 +1,74 @@
+<style lang="less">
+  .mine-default {
+    &__box {
+      display: flex;
+      margin-top: 114px;
+      justify-content: center;
+
+      &__box--image {
+        display: block;
+      }
+    }
+
+    &__title {
+      color: #999999;
+      font-size: 15px;
+      margin-top: 17px;
+      line-height: 21px;
+      text-align: center;
+    }
+  }
+</style>
+
+
+<template>
+  <view calss="mine-default">
+    <view class="mine-default__box">
+      <image
+        class="mine-default__box--image"
+        src="{{ image }}"
+        style="width: {{ width }}px;height: {{ height }}px;"
+      ></image>
+    </view>
+    <view class="mine-default__title">{{ title }}</view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Index extends wepy.page {
+    config = {
+      avigationBarBackgroundColor: '#ffffff',
+      navigationBarTextStyle: 'black',
+      navigationBarTitleText: ''
+    }
+
+    data = {
+      width: '',
+      title: '',
+      image: '',
+      height: ''
+    }
+
+    onLoad(options) {
+      /**
+      * 字段含义
+      * @ type {[
+			*   width：图片的宽度，
+			*   height：图片的高度，
+			*   title：图片下面的文案，
+      *   head：navigationBarTitleText的值，
+			*   image：图片的名字 eg：tn-wx-default
+      * ]}
+      */
+			this.width = options.width
+			this.title = options.title
+			this.height = options.height
+			this.image = '../../../images/' + options.image + '.png'
+			wx.setNavigationBarTitle({
+				title: options.head
+			})
+    }
+  }
+</script>

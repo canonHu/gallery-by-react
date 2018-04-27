@@ -22,11 +22,6 @@
     padding-left: 15px;
   }
 
-  .association-item-text {
-    font-size: 16px;
-    color: #333333;
-  }
-
   .location-title-view {
     display: flex;
     flex-direction: row;
@@ -120,6 +115,16 @@
     display: flex;
     padding-left: 6px;
   }
+
+  .key-text {
+    color: #FF7733;
+    font-size: 17px;
+  }
+
+  .common-text {
+    color: #151515;
+    font-size: 17px;
+  }
 </style>
 
 <template>
@@ -150,8 +155,12 @@
     <!--联想状态下-->
     <view wx:if="{{isSearching}}">
       <repeat for="{{searchResults}}" key="index" index="index">
-        <view class="association-item" data-info="{{item.poiName}}" @tap="clickedCurrentPoi">
-          <text class="association-item-text">{{item.poiName}}</text>
+        <view class="association-item"
+              data-type="searchResult"
+              data-info="{{item.name}}"
+              data-index="{{index}}"
+              @tap="clickedCurrentPoi">
+          <rich-text nodes="{{item.styleName || item.name}}"/>
         </view>
         <view class="association-line"/>
       </repeat>
@@ -160,7 +169,7 @@
     <!--默认状态下 最近 热门推荐-->
     <view wx:else>
 
-      <view wx:if="{{locationName !== '' && locationName !== undefined}}">
+      <view wx:if="{{locationInfo.name !== '' && locationInfo.name !== undefined}}">
         <view class="location-title-view">
           <tex class="title-text">当前定位城市</tex>
         </view>
@@ -174,7 +183,7 @@
               src="../../../images/tn-wx-destination-location.png"
               style="width: 12px; height: 13px; margin-right: 5px;"
             />
-            <text class="location-item-text">{{locationName}}</text>
+            <text class="location-item-text">{{locationInfo.name}}</text>
           </view>
         </view>
       </view>
@@ -194,7 +203,7 @@
               data-index="{{index}}"
               @tap="clickedCurrentPoi"
             >
-              <text class="local-item-text">{{item.poiName}}</text>
+              <text class="local-item-text">{{item.name}}</text>
             </view>
           </repeat>
         </view>
@@ -212,7 +221,7 @@
               data-index="{{index}}"
               @tap="clickedCurrentPoi"
             >
-              <text class="local-item-text">{{item.poiName}}</text>
+              <text class="local-item-text">{{item.name}}</text>
             </view>
           </repeat>
         </view>
@@ -227,6 +236,8 @@
 <script>
   import wepy from 'wepy'
   import utils from '../../../utils/utils'
+  import { getStore } from 'wepy-redux'
+  import { transformLocationName, getPoiList, getHotPoiList } from '../../../store/actions'
 
   export default class Index extends wepy.page {
     config = {
@@ -236,42 +247,22 @@
     }
 
     data = {
+      store: getStore(),
       fromSquare: true,
-      locationName: '',
+      locationInfo: {
+        id: 0,
+        name: ''
+      },
       isSearching: false,
       searchKeyword: '',
       historyTitle: '最近搜索',
-      searchResults: [
-        {
-          poiName: '泰国'
-        },
-        {
-          poiName: '泰国画骨化石'
-        },
-        {
-          poiName: '一日游泰国'
-        },
-        {
-          poiName: '一日游泰国'
-        }
-
-      ],
+      searchResults: [],
       historyPOIList: [],
-      recommendList: [
-        {
-          poiName: '泰国'
-        },
-        {
-          poiName: '泰国画骨化石'
-        },
-        {
-          poiName: '一日游泰国'
-        },
-        {
-          poiName: '一日游泰国'
-        }
-
-      ]
+      recommendList: [],
+      allCity: {
+        name: '全部城市',
+        id: 0
+      }
     }
 
     methods = {
@@ -279,19 +270,21 @@
         this.searchKeyword = value.detail.value
         if (this.searchKeyword !== '') {
           this.isSearching = true
+          this.searchPoi(value.detail.value)
         } else {
           this.isSearching = false
         }
       },
       bindconfirm(value) {
-
+        let keyword = value.detail.value
+        this.searchPoi(keyword)
       },
       clickedClearSearchKeyword() {
         this.isSearching = false
         this.searchKeyword = ''
       },
       clickedClearLocalButton() {
-        this.historyPOIList = []
+        this.historyPOIList = this.fromSquare ? [this.allCity] : []
         this.clearHistory()
       },
       clickedCurrentPoi(item, event) {
@@ -341,10 +334,17 @@
         success: function(res) {
           var latitude = res.latitude
           var longitude = res.longitude
-
-
-          self.locationName = '南京'
-          self.$apply()
+          self.store.dispatch(transformLocationName.apply(this.store, [latitude, longitude]))
+            .then((locationInfo) => {
+              self.locationInfo = {
+                id: locationInfo.payload.districtId,
+                name: locationInfo.payload.districtName
+              }
+              self.$apply()
+            })
+            .catch(() => {
+              // 定位失败
+            })
         }
       })
 
@@ -354,15 +354,46 @@
         success: function(res) {
           self.historyPOIList = res.data
           self.$apply()
+        },
+        complete: function (res) {
+          if (self.fromSquare) {
+            self.historyPOIList.unshift(self.allCity)
+          }
         }
       })
+
+      this.store.dispatch(getHotPoiList.apply()).then(() => {
+        this.recommendList = this.store.getState().search.hotPoiList
+        this.$apply()
+      })
+    }
+
+    searchPoi(value) {
+      let self = this
+      let spaceParams = {
+        keyword: value,
+        marks: 'spot',
+        type: [10]
+      }
+      let squareParams = {
+        keyword: value,
+        type: [10]
+      }
+      let params = this.fromSquare ? squareParams : spaceParams
+      this.store.dispatch(getPoiList.apply(this.store, [params]))
+        .then((res) => {
+          self.searchResults = self.store.getState().search.poiList
+          self.$apply()
+        })
+        .catch(() => {
+        })
     }
 
     getSelectInfo(sourceType, index) {
       let currentTapPOI
       switch (sourceType) {
         case 'location':
-          currentTapPOI = {}
+          currentTapPOI = this.locationInfo
           break
         case 'history':
           currentTapPOI = this.historyPOIList[index]
@@ -383,16 +414,31 @@
 
     // 添加选择历史
     addHistorySelect(currentTapPOI) {
+      if (currentTapPOI.id === 0) {
+        return
+      }
+      for (let i = this.historyPOIList.length - 1; i >= 0; i--) {
+        let tempPOI = this.historyPOIList[i]
+        if (tempPOI.id === currentTapPOI.id || tempPOI.id === 0) {
+          this.historyPOIList.splice(i, 1)
+          break
+        }
+      }
 
       this.historyPOIList.unshift(currentTapPOI)
 
-      this.historyPOIList = this.historyPOIList.slice(0, 5)
+      this.historyPOIList = this.historyPOIList.slice(0, this.fromSquare ? 4 : 5)
 
       wx.setStorage({
         key: this.fromSquare ? utils.squareSearchPOICache : utils.spaceSearchPOICache,
         data: this.historyPOIList,
         success: () => {
 
+        },
+        complete: function (res) {
+          if (this.fromSquare) {
+            this.historyPOIList.unshift(this.allCity)
+          }
         }
       })
     }

@@ -133,4 +133,43 @@ obj.getEffectiveIndex = function(currentIndex, totalCount) {
   return currentIndex >= totalCount ? totalCount - 1 : currentIndex
 }
 
+/*关键词匹配*/
+obj.matchKeyword = function(key, str){
+  if (!obj.haveValue(key) || !obj.haveValue(str)) {
+    return str
+  }
+    let pattern = '(' + obj.escapeRegExChars(key) + ')',
+      poiNameReg = new RegExp(pattern, 'gi'),
+      result = ''
+
+    let wordArray = str
+      .replace(poiNameReg , '#')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .split("")
+
+    wordArray.map((word)=>{
+      if(word == "#"){
+        result += '<span class="key-text">'+ key + '<span/>'
+      }else{
+        result += '<span class="common-text">'+ word + '</span>'
+      }
+    })
+
+    return result
+  }
+obj.escapeRegExChars = function (value) {
+    return value.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&")
+}
+
+obj.haveValue = function (strOrArr) {
+  if (strOrArr && strOrArr.length > 0) {
+    return true
+  } else {
+    return false
+  }
+}
+
 module.exports = obj

@@ -15,7 +15,7 @@
     text-overflow: ellipsis;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    font-size: 15px;
+    font-size: 13px;
     color: #666666;
     font-weight: bold;
   }
@@ -41,6 +41,7 @@
     position: absolute;
     top: 0px;
     left: 0px;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.12);
     background-color: rgba(0,0,0,0.50);
     width: 100%;
     height: 100%;
@@ -51,6 +52,7 @@
     height: 110px;
     width: 110px;
     background: white;
+    border: 1px solid rgba(255,119,51,0.48)
   }
 
   .touch-view {
@@ -64,15 +66,16 @@
   <view class="back-view">
     <view
       class="touch-view"
-      bindlongpress="bindlongpress"
-      bindtouchmove="onChange"
-      bindtouchend="bindtouchend"
+      catchlongpress="bindlongpress"
+      catchtouchmove="onChange"
+      catchtouchend="bindtouchend"
     >
       <repeat for="{{contents}}" key="index" index="index">
         <view
           data-index="{{index}}"
           class="sort-view"
           style="top: {{layouts[index].y}}px; left: {{layouts[index].x}}px;"
+          opacity="{{currentIndex !== index ? 0.5 : 1}}"
         >
 
           <view
@@ -89,11 +92,6 @@
               style="width: 110px; height: 100px;"
             />
           </view>
-
-          <view
-            hidden="{{currentIndex !== index}}"
-            class="sort-view-mask"
-          />
         </view>
       </repeat>
     </view>

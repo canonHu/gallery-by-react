@@ -189,17 +189,19 @@
       <!--背景view-->
       <image
         mode="aspectFill"
-        style="width: 100%; height: 124px; background-color: antiquewhite;"
+        src="{{spaceInfo.coverImageUrl}}"
+        style="width: 100%; height: 124px;"
       />
       <!--内容-->
       <view class="header-view">
         <view class="content-view">
           <view class="avatar-view">
             <image
-              src="../../../images/test-rectangle.png"
+              src="{{spaceInfo.spaceUserHeadImg}}"
               style="border-radius: 2px;box-shadow: 0 2px 4px 0 rgba(0,0,0,0.23);width: 76px; height: 76px;"
             />
             <view
+              wx:if="{{isMine}}"
               @tap="clickedEditorSpace"
               class="editor-button"
             >
@@ -211,10 +213,10 @@
           </view>
           <view class="content-style">
             <view class="center">
-              <text class="space-title">日本七日游</text><text class="space-authority">(私密)</text>
+              <text class="space-title">{{spaceInfo.spaceName}}</text><text class="space-authority">{{spaceInfo.power === 0 ? '' : '(私密)'}}</text>
             </view>
-            <text class="space-user">郭麒麟</text>
-            <text class="space-pv-tip">浏览量 <text class="space-pv-count">1817</text></text>
+            <text class="space-user">{{spaceInfo.spaceUserName}}</text>
+            <text class="space-pv-tip">浏览量 <text class="space-pv-count">{{getPVStr}}</text></text>
           </view>
         </view>
 
@@ -356,13 +358,12 @@
 <script>
   import wepy from 'wepy'
   import { getStore } from 'wepy-redux'
-  import { obtainUserInfo } from '../../../store/actions'
+  import { getSpaceDetail } from '../../../store/actions'
 
   import TabList from '../../../components/tab-list'
   import TabListView from '../../../components/tab-list-view'
-  import SpaceDetailListItem from '../../../components/space-detail-list-item'
+  import SpaceDetailListItem from '../../../components/space/space-detail-list-item'
   import AlertList from '../../../components/alert-list'
-  import test from '../../../utils/test'
   import utils from '../../../utils/utils'
 
   export default class Index extends wepy.page {
@@ -392,8 +393,9 @@
       selectItem: {},
 
       store: getStore(),
-      userId: 0,
       spaceId: 0,
+      userId: 0,
+      isMine: false,
 
       showTabview: false,
       defaultBackColor_view: '#FFFFFF',
@@ -435,6 +437,9 @@
     computed = {
       getTabViewWidth() {
         return this.$parent.globalData.screenWidth - 54
+      },
+      getPVStr() {
+        return utils.getPVStr(this.spaceInfo.pv)
       }
     }
 
@@ -448,7 +453,9 @@
         this.changeTab(num.info.name)
       },
       clickedEditorSpace() {
-        this.$navigate('../create-space/index', {isEditor: true})
+        if ((this.store.getState().request.userInfo.userId === this.userId)) {
+          this.$navigate('../create-space/index', {isEditor: true, spaceInfo: JSON.stringify(this.spaceInfo)})
+        }
       },
       clickedSearchButton() {
         this.$navigate('../../search/content-search/index?fromSquare=false', {})
@@ -506,7 +513,7 @@
         }
       },
       clickedPostButton() {
-        this.$navigate('../../pop/content-post/index', {type: 'space', selectPois: this.spaceInfo.poiList})
+        this.$navigate('../../pop/content-post/index', {spaceId: this.spaceId})
       },
       clickedTopButton() {
         wx.pageScrollTo({
@@ -580,46 +587,59 @@
         this.spaceId = opts.spaceId
       }
 
-      let self = this
-      this.tabs = test.testTabData
-      this.list = test.testSpaceListData
-      this.list.forEach((item, index) => {
-        item.pvStr = utils.getPVStr(item.pv)
-        item.simpleContent = self.getShowContentText(item.elements)
-        let tempImgs = self.getShowImgs(item.elements)
-        item.simpleImgsCount = tempImgs.length
-        item.simpleImgs = tempImgs.slice(0, 3)
-      })
-      this.$apply()
+      if (opts && opts.userId) {
+        this.userId = opts.userId
+      } else {
+        this.userId = this.store.getState().request.userInfo.userId
+      }
 
-
-      wx.getSetting({
-        success(res) {
-          if (!res.authSetting['scope.userInfo']) {
-            wx.authorize({
-              scope: 'scope.userInfo',
-              success() {
-                self.store.dispatch(obtainUserInfo.apply()).then((e) => {
-                  self.setUserId()
-                })
-              },
-              fail() {
-                wx.reLaunch({url: '../../error/authority-fail/index'})
-              }
-            })
-          } else {
-            self.store.dispatch(obtainUserInfo.apply()).then((e) => {
-              self.setUserId()
-            })
-          }
-        }
-      })
+      this.isMine = (this.store.getState().request.userInfo.userId === this.userId)
     }
 
-    setUserId() {
-      const store = getStore()
-      const state = store.getState()
-      this.userId = state.request.userInfo.userId
+    onShow() {
+      let self = this
+      this.store.dispatch(getSpaceDetail.apply(this.store, [this.userId, this.spaceId]))
+        .then(() => {
+          self.spaceInfo = self.store.getState().space.spaceDetail
+          self.$apply()
+        })
+
+
+      this.store.dispatch(getSpaceDetail.apply(this.store, [this.userId, this.spaceId]))
+        .then(() => {
+          self.spaceInfo = self.store.getState().space.spaceDetail
+          self.$apply()
+        })
+
+//      this.list.forEach((item, index) => {
+//        item.pvStr = utils.getPVStr(item.pv)
+//        item.simpleContent = self.getShowContentText(item.elements)
+//        let tempImgs = self.getShowImgs(item.elements)
+//        item.simpleImgsCount = tempImgs.length
+//        item.simpleImgs = tempImgs.slice(0, 3)
+//      })
+//      this.$apply()
+
+    }
+
+    onShareAppMessage(res) {
+      if (this.spaceInfo.spaceId === undefined) {
+        return
+      }
+      let spaceName = this.spaceInfo.spaceName
+      if (spaceName.length > 20) {
+        spaceName = spaceName.slice(0, 20) + '...'
+      }
+      return {
+        title: `邀请你查看${spaceName}`,
+        path: `/pages/space/space-detail/index?spaceId=${this.spaceId}&userId=${this.store.getState().request.userInfo.userId}`,
+        success: function(res) {
+          // 转发成功
+        },
+        fail: function(res) {
+          // 转发失败
+        }
+      }
     }
 
     getShowContentText(elements) {

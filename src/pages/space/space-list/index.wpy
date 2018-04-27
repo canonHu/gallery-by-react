@@ -28,7 +28,7 @@
   <view>
     <view>
       <view class="back-view">
-        <repeat for="{{list}}" key="index" index="index">
+        <repeat for="{{spaceList}}" key="index" index="index">
           <view style="margin-left: 21px;">
             <spaceitem
               :index="index"
@@ -57,8 +57,9 @@
 
 <script>
   import wepy from 'wepy'
-  import SpaceItem from '../../../components/space-item'
-  import test from '../../../utils/test'
+  import SpaceItem from '../../../components/space/space-item'
+  import { getStore } from 'wepy-redux'
+  import { getSpaceList } from '../../../store/actions'
 
   export default class Index extends wepy.page {
     config = {
@@ -72,10 +73,11 @@
     }
 
     data = {
+      store: getStore(),
       addSpace: false,
       spaceSize: 10,
       selectList: [],
-      list: []
+      spaceList: []
     }
 
     computed = {
@@ -91,7 +93,7 @@
       clickedSimpleSpace(num, evt) {
         if (this.addSpace === true) {
           // 添加到空间
-          let temp = this.list[num.index]
+          let temp = this.spaceList[num.index]
           if (temp.selected === true) {
             temp.selected = false
             for (let i = this.selectList.length - 1; i >= 0; i--) {
@@ -111,12 +113,14 @@
       clickedCompleteButton() {
         let self = this
         var pages = getCurrentPages()
-        var beforePage = pages[pages.length - 2] // 前一个页面
-        this.$back({
-          success: function() {
-            beforePage.addSpace(self.selectList)
-          }
-        })
+        if (pages && pages.length > 0) {
+          var beforePage = pages[pages.length - 2] // 前一个页面
+          this.$back({
+            success: function() {
+              beforePage.addSpace(self.selectList)
+            }
+          })
+        }
       }
     }
 
@@ -124,7 +128,14 @@
       if (options && options.addSpace !== undefined) {
         this.addSpace = JSON.parse(options.addSpace)
       }
-      this.list = test.testData
+
+      let self = this
+      // 请求空间列表
+      this.store.dispatch(getSpaceList.apply(this.store, [this.store.getState().request.userInfo.userId]))
+        .then(() => {
+          self.spaceList = self.store.getState().space.spaceList
+          self.$apply()
+        })
     }
   }
 </script>

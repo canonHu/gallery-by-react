@@ -15,8 +15,8 @@
     <view class="release-list">
       <repeat for="{{ arr }}" key="index" item="item" index="index">
         <releaseitem
-          :items="item" 
-          :index="index"
+          :items.sync="item"
+          :index.sync="index"
           @tapEvent.user="changeedit"
         ></releaseitem>
       </repeat>

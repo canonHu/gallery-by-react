@@ -13,8 +13,13 @@
 import wepy from 'wepy'
 import 'wepy-async-function'
 
-import { setStore } from 'wepy-redux'
+import { setStore, getStore } from 'wepy-redux'
 import configStore from './store'
+import {
+  getSpaceList,
+  getUsersCount,
+  obtainUserInfo
+} from './store/actions'
 
 const store = configStore()
 setStore(store)
@@ -22,7 +27,7 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
-
+      // 空间
       'pages/space/space-home/index',
       'pages/space/create-space/index',
       'pages/space/dynamic-list/index',
@@ -31,6 +36,7 @@ export default class extends wepy.app {
       'pages/space/add-destination/index',
       'pages/space/change-tab/index',
 
+      // 发布
       'pages/editor/content-editor/index',
       'pages/editor/title-editor/index',
       'pages/editor/paragraph-editor/index',
@@ -39,11 +45,15 @@ export default class extends wepy.app {
       'pages/square/square-home/index',
       'pages/square/square-quote/index',
 
+      // 个人中心
       'pages/mine/mine-home/index',
       'pages/mine/mine-release/index',
+      'pages/mine/mine-default/index',
       'pages/mine/mine-collection/index',
       'pages/mine/mine-change-name/index',
 
+      // 公共页面
+      'pages/common/common-default/index',
       'pages/error/authority-fail/index',
 
       'pages/pop/content-post/index',
@@ -112,6 +122,7 @@ export default class extends wepy.app {
   }
 
   onLaunch() {
+    getStore().dispatch(obtainUserInfo.apply())
   }
 
   sleep (s) {

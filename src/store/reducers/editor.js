@@ -4,7 +4,9 @@ import {
   CHANGE_CONTENT_TITLE,
   CHANGE_CONTENT_POI_LIST,
   CHANGE_CONTENT_TAG_LIST,
-  EDITOR_CONTENT_CLEAR
+  EDITOR_CONTENT_CLEAR,
+  PUBLISH_ARTICLE,
+  ARTICLE_DETAIL
 } from '../types/editor'
 
 
@@ -96,7 +98,7 @@ export default handleActions({
         wx.navigateBack()
       } else {
         wx.redirectTo({
-          url: `../content-editor/index?type=${action.payload.source.data.type}&spacePois=${action.payload.source.data.spacePois}`
+          url: `../content-editor/index?spaceId=${action.payload.source.data.spaceId}`
         })
       }
     }
@@ -119,10 +121,23 @@ export default handleActions({
       ...state,
       tagList: action.tagList
     }
+  },
+
+  [PUBLISH_ARTICLE] (state, action) {
+    return {
+      ...state,
+    }
+  },
+  [ARTICLE_DETAIL] (state, action) {
+    return {
+      ...state,
+      articleDetail: action.payload
+    }
   }
 }, {
   title: '',
   contents: [],
   poiList: [],
   tagList: [],
+  articleDetail: {}
 })

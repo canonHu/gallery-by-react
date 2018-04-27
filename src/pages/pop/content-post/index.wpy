@@ -101,7 +101,7 @@
     }
 
     data = {
-      type: '',
+      spaceId: '',
       showIconList: [],
       currentDay: '',
       currentWeek: '',
@@ -109,8 +109,8 @@
     }
 
     onLoad (opts) {
-      this.type = opts.type
-      if (opts.type === 'square') {
+      this.spaceId = opts.spaceId !== undefined ? parseInt(opts.spaceId) : 0
+      if (this.spaceId === 0) {
         this.showIconList = utils.squareIconList
       } else {
         this.showIconList = utils.spaceIconLit
@@ -126,7 +126,7 @@
         this.$back()
       },
       clickItem(url) {
-        this.$redirect(url, {type: this.type})
+        this.$redirect(url, {spaceId: this.spaceId})
       }
     }
   }

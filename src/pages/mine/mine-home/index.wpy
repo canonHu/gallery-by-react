@@ -108,9 +108,19 @@
 
 <script>
   import wepy from 'wepy'
-  import { getStore } from 'wepy-redux'
-  import { RES_DATA } from '../../../store/types/mine'
+  import { getStore, connect } from 'wepy-redux'
+  import { getListData } from '../../../store/actions'
   import MineHomeHead from '../../../components/mine/mine-home-head'
+
+  @connect({
+    userInfo(state) {
+      return state.request.userInfo
+    },
+
+    nickName(state) {
+      return state.mine.nickName
+    }
+  }, {})
 
   export default class Index extends wepy.page {
     config = {
@@ -134,13 +144,32 @@
 
     methods = {
       mineRelease(num, evt) {
-        this.getData('release')
-        this.$navigate('../mine-release/index', {})
+        if (this.userInfo.publishCount === 0) {
+          this.$navigate('../../common/common-default/index', {
+            width: '127',
+            height: '91',
+            head: '我的发布',
+            title: '暂无发布',
+            image: 'tn-wx-norelease'
+          })
+        } else {
+          this.getData('release')
+        }
       },
 
       mineCollection(num, evt) {
-        this.getData('collection')
-        this.$navigate('../mine-collection/index', {})
+        if (this.userInfo.collectCount === 0) {
+          this.$navigate('../../common/common-default/index', {
+            width: '114',
+            height: '112',
+            head: '我的收藏',
+            title: '暂无收藏',
+            name: 'collection',
+            image: 'tn-wx-nocollection'
+          })
+        } else {
+          this.getData('collection')
+        }
       },
 
       changeName(num, evt) {
@@ -152,22 +181,20 @@
     }
 
     getData(name) {
-      let payLoads = {
+      let payloads = {
         openId: '123',
         limit: 10,
         page: 1
       }
-      this.store.dispatch({
-        type: RES_DATA,
-        name,
-        payLoads
-      })
+      this.store
+        .dispatch(getListData.apply(this.store, [payloads, name])).then((res) => {
+          this.$navigate('../mine-' + name + '/index', {})
+        })
     }
 
     onShow() {
-      const state = this.store.getState()
-      const nickName = state.mine.nickName
-      const userInfo = state.request.userInfo
+      const nickName = this.nickName
+      const userInfo = this.userInfo
       if (nickName) {
         if (nickName !== this.name) {
           this.name = nickName
@@ -179,7 +206,6 @@
         }
       } else {
         if (userInfo) {
-          this.userInfo = userInfo
           this.userId = userInfo.userId
           this.name = userInfo.nickname
         } else {

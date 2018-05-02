@@ -46,7 +46,6 @@ export default class extends wepy.app {
       // 个人中心
       'pages/mine/mine-home/index',
       'pages/mine/mine-release/index',
-      'pages/mine/mine-default/index',
       'pages/mine/mine-collection/index',
       'pages/mine/mine-change-name/index',
 
